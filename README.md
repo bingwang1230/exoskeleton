@@ -34,4 +34,4 @@
 ## Git
 
 - `main` 唯一长期分支；commit 中文，`<前缀>: <描述>`（前缀见 AGENTS.md §4）。
-- 远端：待配置（建议 gitee/GitHub 私有仓；公开部分后续按代码工件拆）。
+- 远端：`git@gitee.com:bingwang1230/exoskeleton.git`（私有仓；公开部分后续按代码工件拆）。
