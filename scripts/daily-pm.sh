@@ -1,10 +1,11 @@
 #!/bin/bash
-# 外骨骼计划 · 每日项目经理提醒（v3）
+# 外骨骼计划 · 每日项目经理提醒（v4：周日双会话）
 # 主触发：launchd local.exoskeleton-daily-pm（每日 08:00）
 # 兜底：pi-subagents schedule "daily-pm"（every 1d，锚定 08:00；晚于 08:00 打开本项目 pi 会话时补发）
-# 交付：① 创建一条命名会话（user-turn 用用户口吻发问，assistant 按协议出三行建议）——未读即提醒，
-#        用户进入回复后该会话转常态会话（可落账）；② Bark 推送回复内容作手机端提醒。
-# 失败语义：pi 无输出 → 推失败通知但不写 stamp、exit 1（当天打开项目会话时兜底层可补发）
+# 交付：每天一条「每日提醒 · 日期」命名会话；周日额外一条「周复盘 · 日期」。
+#        未读会话即提醒；用户进入回复后该会话转常态会话（可落账）；Bark 推送作手机端入口。
+# 失败语义：每日提醒本体失败 → 不写 stamp、exit 1（当天打开项目会话时兜底层可补发）；
+#           仅周复盘失败 → 写 stamp（防每日提醒重复推），exit 1，详见日志。
 # 幂等：stamp=今日则跳过；DAILY_PM_FORCE=1 强制跑（标题加「测试」前缀，不写 stamp）
 set -uo pipefail
 
@@ -44,7 +45,7 @@ fi
 [ -z "${BARK_KEY:-}" ] && { log_err "ERROR: BARK_KEY missing"; exit 1; }
 export BARK_KEY
 
-# ---- API 认证兑底：launchd/无头环境没有 shell rc 的 export，从 ~/.zshrc 等提取 pi 认证相关变量 ----
+# ---- API 认证兜底：launchd/无头环境没有 shell rc 的 export，从 ~/.zshrc 等提取 pi 认证相关变量 ----
 if [ -z "${GLM_CODING_PLAN_APIKEY:-}" ]; then
   eval "$(grep -hE '^export [A-Z0-9_]*(KEY|TOKEN|APIKEY)=' ~/.zshrc ~/.zprofile ~/.zshenv 2>/dev/null | sort -u)" || true
 fi
@@ -78,38 +79,43 @@ fi
 mkdir "$LOCK" 2>/dev/null || { echo "[$(date '+%F %T')] 另一实例在跑，退出"; exit 0; }
 trap 'rmdir "$LOCK" 2>/dev/null' EXIT
 
-# ---- 组装会话首条 user-turn（用户口吻）与会话名 ----
+# ---- 单条会话：跑 LLM → 建 session → 推 Bark → 记 last.md ----
+run_one() { # $1=会话名 $2=user开场白 $3=Bark标题前缀
+  local sname="$1" umsg="$2" btitle="$3" out msg body title
+  out="$(perl -e 'alarm 900; exec @ARGV' "$PI_BIN" --no-extensions -n "$sname" -p "$umsg" 2>>"$LOG_DIR/daily-pm.err")"
+  if [ -z "$out" ]; then
+    log_err "ERROR: [$sname] pi 无输出"
+    return 1
+  fi
+  msg="$(printf '%s\n' "$out" | sed '/^[[:space:]]*$/d')"
+  body="$(printf '%s' "$msg" | head -c 300)"$'\n''（回复请进会话）'
+  if [ "${DAILY_PM_FORCE:-0}" = "1" ]; then title="[测试] $btitle · $TODAY"; else title="$btitle · $TODAY"; fi
+  push_bark "$title" "$body" || { log_err "ERROR: [$sname] bark 推送失败（会话已创建）"; return 1; }
+  printf '%s\nsession: %s\nprompt: %s\n\n%s\n' "$(date '+%F %T')" "$sname" "$umsg" "$msg" >>"$LAST"
+  echo "[$(date '+%F %T')] OK name=$sname (force=${DAILY_PM_FORCE:-0})"
+}
+
+: >"$LAST"
+
+# ---- 每日提醒（每天，含周日）----
+RC=0
+run_one "每日提醒 · $TODAY" "每天早上的定时提醒到了：今天适合做什么？" "外骨骼今日建议" || RC=1
+
+# ---- 周复盘（仅周日，与每日并存）----
 if [ "$DOW" = "7" ]; then
-  SNAME="周复盘 · $TODAY"
-  UMSG="开始本周复盘吧：对照本周计划与实际进展（git log 和周记），汇总实际人时，起草下周计划——我确认后再落账。"
-  BTITLE_BASE="外骨骼周复盘"
-else
-  SNAME="每日提醒 · $TODAY"
-  UMSG="每天早上的定时提醒到了：今天适合做什么？"
-  BTITLE_BASE="外骨骼今日建议"
+  run_one "周复盘 · $TODAY" "开始本周复盘吧：对照本周计划与实际进展（git log 和周记），汇总实际人时，起草下周计划——我确认后再落账。" "外骨骼周复盘" || RC=1
 fi
 
-# ---- 跑 LLM：创建命名会话（--no-extensions 防止 settle 推送与我们的 Bark 重复）----
-cd "$REPO"
-OUT="$(perl -e 'alarm 900; exec @ARGV' "$PI_BIN" --no-extensions -n "$SNAME" -p "$UMSG" 2>>"$LOG_DIR/daily-pm.err")"
-
-# ---- 失败守卫：pi 无输出 = 生成失败。推失败通知，不写 stamp（当天可由兜底层补发），exit 1 ----
-if [ -z "$OUT" ]; then
-  log_err "ERROR: pi 无输出（环境/认证问题？），本次不写 stamp"
-  push_bark "$BTITLE_BASE · $TODAY" "今日提醒生成失败（pi 无输出，详见 .pi/logs/daily-pm.err）。今天内打开本项目任意 pi 会话会自动补发。" || true
+# ---- 结束语义 ----
+if [ "$RC" = "0" ]; then
+  [ "${DAILY_PM_FORCE:-0}" != "1" ] && echo "$TODAY" >"$STAMP"
+  exit 0
+fi
+if ! grep -q "^session: 每日提醒" "$LAST" 2>/dev/null; then
+  # 每日提醒本体失败：不写 stamp（当天可由兜底层补发），推失败通知
+  push_bark "外骨骼今日建议 · $TODAY" "今日提醒生成失败（详见 .pi/logs/daily-pm.err）。今天内打开本项目任意 pi 会话会自动补发。" || true
   exit 1
 fi
-
-MSG="$(printf '%s\n' "$OUT" | sed '/^[[:space:]]*$/d')"
-BODY="$(printf '%s' "$MSG" | head -c 300)"$'\n''（回复请进会话）'
-
-# ---- 推送 ----
-if [ "${DAILY_PM_FORCE:-0}" = "1" ]; then TITLE="[测试] $BTITLE_BASE · $TODAY"; else TITLE="$BTITLE_BASE · $TODAY"; fi
-if push_bark "$TITLE" "$BODY"; then
-  if [ "${DAILY_PM_FORCE:-0}" != "1" ]; then echo "$TODAY" >"$STAMP"; fi
-  printf '%s\nsession: %s\nprompt: %s\n\n%s\n' "$(date '+%F %T')" "$SNAME" "$UMSG" "$MSG" >"$LAST"
-  echo "[$(date '+%F %T')] OK name=$SNAME (force=${DAILY_PM_FORCE:-0})"
-else
-  log_err "ERROR: bark 推送失败（不写 stamp；会话「$SNAME」已创建）"
-  exit 1
-fi
+# 每日提醒成功、周复盘失败：写 stamp 防重复，失败详情在日志
+[ "${DAILY_PM_FORCE:-0}" != "1" ] && echo "$TODAY" >"$STAMP"
+exit 1
