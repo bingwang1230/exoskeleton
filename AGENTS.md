@@ -73,3 +73,10 @@
 ## 8. 出处
 
 2026-08-29 自 pebble_space `products/exoskeleton/` 拆出为独立仓库；拆分前历史见 pebble_space（commit 299527f 及祖先）。产品开发方法论（需求→架构→UIUX…）技能库仍在 pebble_space `skills/产品开发/`，网站立项时取用。
+
+## 9. 双机开发环境（2026-08-30）
+
+- **mac mini（日常主力机）**：轻负载——文档、写作、浏览、仓库维护。**daily-pm（launchd 08:00 + schedule 兑底 + stamp/Bark）只部署在此机**；MBP 一律不配，避免双机重复提醒。
+- **MacBook Pro（M4 Max / 128G，重负载机）**：吃配置的环境与开发放这里——MuJoCo/MJX GPU 并行仿真、批量优化、重渲染、大构建。与 mini 同 tailnet，可经 `server_debug(host=mbp)` SSH 诊断（只读向，破坏性命令会被拒）；重部署优先在 MBP 上直接开 pi 会话执行。
+- 两机各自 clone 本仓库；任何跨机操作前先 `git pull` 对齐。
+- 分层原则：基础 MuJoCo 验证任一机器可跑；MJX/GPU 批量与重渲染默认 MBP。
