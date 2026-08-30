@@ -44,16 +44,21 @@
 
 ## 6. 定时提醒协议（每日项目经理，2026-08-30 v2）
 
-**触发**：launchd `local.exoskeleton-daily-pm` 每日 08:00 主触发；pi-subagents schedule `daily-pm`（every 1d，锚定 08:00）作补发兑底（晚于 08:00 才打开本项目 pi 会话时补发）。幂等：`.pi/daily-pm/stamp` 为今日则跳过；两个触发源去重。逻辑实现在 `scripts/daily-pm.sh` + `scripts/daily-pm.prompt.md`，测试：`DAILY_PM_FORCE=1 bash scripts/daily-pm.sh`。
+**触发**：launchd `local.exoskeleton-daily-pm` 每日 08:00 主触发；pi-subagents schedule `daily-pm`（every 1d，锚定 08:00）作补发兑底（晚于 08:00 才打开本项目 pi 会话时补发）。幂等：`.pi/daily-pm/stamp` 为今日则跳过；两个触发源去重。逻辑实现在 `scripts/daily-pm.sh`，测试：`DAILY_PM_FORCE=1 bash scripts/daily-pm.sh`。
 
-定时 agent 的职责边界：
+**交付（2026-08-30 v2：未读会话即提醒）**：每次触发用 `pi --no-extensions -n <名称> -p <用户口吻的开场白>` 创建一条命名会话——**未读会话就是提醒本体**，Bark 推送只是手机端入口提示。用户进入回复后，该会话即转为常态会话：按 §5/落账规则当场处理（确认完成、改期、容量反馈均可落账）。行为规范：
+
+- 每日会话（名「每日提醒 · YYYY-MM-DD」）：开场白「每天早上的定时提醒到了：今天适合做什么？」，回复即下述三行建议。
+- 周日会话（名「周复盘 · YYYY-MM-DD」）：开场白「开始本周复盘吧……」，回复给出本周实际 vs 计划、容量汇总与下周计划**草案**，用户确认后才落账改板。
+
+定时 agent 的职责边界（会话首答同样遵守）：
 
 - **只读**：`PROGRESS.md`（快照/阶段门/本周计划/周记末两行）+ `docs/决策记录.md` 最新一条 + `git log --since=36h`（实际进展的唯一客观证据）+ `.pi/daily-pm/last.md`（上次建议，对照执行情况）。
 - **只报**：≤3 行——「到期未勾：…｜建议今天（人的任务，约 N 分钟）：…｜判据门提醒：…」；周日追加一行复盘提醒。建议只包含人必须亲自做的任务（见三线计划 §2 分工表），不出现 AI 可独立完成的任务。
 - **降级**：git 连续 ≥3 天无提交 → 不重复催促，改为问卡点/建议拆小任务/建议明确暂停；本周计划日期过期 → 提示待重排。
 - **不改板**：任何 PROGRESS.md/计划改动只发生在用户在场的对话会话（周日的复盘对话）。需要改计划时输出「建议改板：…」等用户确认，由常态会话执行。
 
-**交付**：结果直推 Bark（脚本自 curl，不走 agent_settled 通知链——该链按设计排除无人值守会话），同时落 `.pi/daily-pm/last.md`；日志在 `.pi/logs/`。
+**交付**：会话 + Bark 直推（脚本自 curl，不走 agent_settled 通知链——该链按设计排除无人值守会话），同时落 `.pi/daily-pm/last.md`；日志在 `.pi/logs/`。
 
 **不做的事**：不建每日 memory 库（实际进展以 git 提交为准，当日 AI 会话洞察由用户随手记入 `learn/<科目>/notes/` 或周记）；不引入百分比进度条（阶段门表即进度条）。
 
