@@ -1,6 +1,6 @@
 # 《OpenExo: An Open-Source Modular Exoskeleton to Augment Human Function》学习进度
 
-> 最后更新：2026-08-31（开课：第一章学习中）
+> 最后更新：2026-08-31（第一章完成：5 概念 0.5–0.8，含 2 条用户提问催生的延伸概念；会话总结见 notes/20260831_第一章学思笔记.md）
 > 材料：`materials/OpenExo_全文（整理版）.md`（AI 整理）+ `materials/OpenExo_ScienceRobotics2025.pdf`（正式版原文）
 > 论文：Science Robotics 2025-06-25（biorxiv 2024-10-03 预印本）｜配套工程精读笔记：`../../../reports/20260830.OpenExo精读初稿.md`
 > 学习目标：吃透踝构型的硬件与控制（P1 复现对象），建立可写进仿真的参数表
@@ -13,7 +13,7 @@
 | 外骨骼分类法：主动/被动 × 有缆/无缆 | 0.7 | notes/ch01_外骨骼分类法.md |
 | 外骨骼的定义与边界（界面 vs 力路） | 0.8 | notes/ch01_外骨骼的定义与边界.md |
 | 跟腱弹簧模型与负功回收（教学延伸） | 0.6 | notes/ch01_跟腱弹簧模型与负功回收.md |
-| 开源先行者（OpenBionics/FlexSEA/ALICE）及其不足 | 0.0 | - |
+| 开源先行者（OpenBionics/FlexSEA/ALICE）及其不足 | 0.5 | notes/ch01_开源先行者.md |
 
 ## 二、设计目标与模块化哲学
 
