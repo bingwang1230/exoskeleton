@@ -1,6 +1,6 @@
 # 《OpenExo: An Open-Source Modular Exoskeleton to Augment Human Function》学习进度
 
-> 最后更新：2026-08-30（初始化，尚未开课）
+> 最后更新：2026-08-31（开课：第一章学习中）
 > 材料：`materials/OpenExo_全文（整理版）.md`（AI 整理）+ `materials/OpenExo_ScienceRobotics2025.pdf`（正式版原文）
 > 论文：Science Robotics 2025-06-25（biorxiv 2024-10-03 预印本）｜配套工程精读笔记：`../../../reports/20260830.OpenExo精读初稿.md`
 > 学习目标：吃透踝构型的硬件与控制（P1 复现对象），建立可写进仿真的参数表
