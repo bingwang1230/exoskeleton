@@ -1,0 +1,402 @@
+#!/usr/bin/env python3
+"""
+volume_sync —— exoskeleton/volume 单向同步到外接盘（自 pebble_space 同名工具适配，策略同源）
+
+策略（详见同目录 README.md）：
+  - 严格单向：volume/ → 外接盘（<mount>/pebble_volume/）。
+  - 以一级子目录为同步单元：本地有(owner=本机)的子目录内部做镜像
+    （-a --delete，该删删该加加，冲突以本地为准）。
+  - 盘上有、本地没有的一级子目录：原样保留（归档），永不整体 --delete。
+  - owner 约定：每个子目录内 .volume_meta 声明 owner 机器；非本机 owner 的子目录跳过。
+  - 两阶段：plan（只读，产出 plan）→ 人确认 → apply（复验后真同步）。禁止一步到位。
+
+用法：
+  ./volume_sync plan  <mount_point> [--volume DIR] [--machine NAME]
+  ./volume_sync apply <mount_point> [--volume DIR] [--machine NAME]
+"""
+
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import socket
+import subprocess
+import sys
+from datetime import datetime, timezone
+from fnmatch import fnmatch
+
+SUBDIR_ON_DISK = "exoskeleton_volume"   # target_root = <mount>/exoskeleton_volume
+PLAN_NAME = ".pending_plan.json"        # plan 文件名（写在 target_root 下）
+MANIFEST_NAME = ".sync_manifest.json"   # 本次同步审计记录（写在 target_root 下）
+META_NAME = ".volume_meta"              # 子目录内 owner 声明（随子目录同步上盘）
+
+RSYNC = shutil.which("rsync") or os.environ.get("RSYNC", "rsync")
+
+
+# ---------- 路径与机器标识 ----------
+
+def repo_root():
+    # products/volume_sync/volume_sync -> 上两级
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+def default_volume():
+    return os.path.join(repo_root(), "volume")
+
+def target_root_of(mount_point):
+    return os.path.join(mount_point, SUBDIR_ON_DISK)
+
+def plan_path_of(mount_point):
+    return os.path.join(target_root_of(mount_point), PLAN_NAME)
+
+def hostname_short():
+    return socket.gethostname().split(".")[0]
+
+
+# ---------- 子目录 owner 元数据 ----------
+
+def meta_path(volume_dir, subdir):
+    return os.path.join(volume_dir, subdir, META_NAME)
+
+def read_meta(volume_dir, subdir):
+    p = meta_path(volume_dir, subdir)
+    if os.path.isfile(p):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return None
+    return None
+
+def write_meta(volume_dir, subdir, owner):
+    p = meta_path(volume_dir, subdir)
+    existing = read_meta(volume_dir, subdir) or {}
+    data = {
+        "owner": owner,
+        "declared_at": existing.get("declared_at") or now_iso(),
+        "last_sync": now_iso(),
+    }
+    with open(p, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True)
+
+
+# ---------- 快照（用于 apply 复验源未变） ----------
+
+def snapshot(volume_dir, subdir, patterns=None):
+    """对子目录内用户数据（排除 .volume_meta 与 ignore 规则）生成稳定摘要 hash。"""
+    cores = pat_cores(patterns or [])
+    base = os.path.join(volume_dir, subdir)
+    h = hashlib.sha256()
+    files = []
+    for root, _dirs, names in os.walk(base):
+        for n in names:
+            if n == META_NAME or name_excluded(n, cores):
+                continue
+            full = os.path.join(root, n)
+            rel = os.path.relpath(full, base)
+            try:
+                st = os.stat(full)
+            except OSError:
+                continue
+            files.append((rel, st.st_size, st.st_mtime_ns))
+    for rel, size, mtime_ns in sorted(files):
+        h.update(f"{rel}\0{size}\0{mtime_ns}\n".encode("utf-8"))
+    return h.hexdigest(), len(files)
+
+
+# ---------- rsync ----------
+
+def rsync_run(src_dir, dst_dir, dry, patterns=None):
+    """单子目录镜像：src_dir/ -> dst_dir/。dry=True 时只读 dry-run。"""
+    cmd = [RSYNC, "-a", "--delete", "--itemize-changes"]
+    for p in (patterns or []):
+        pp = p.strip()
+        if not pp or pp.startswith("#"):
+            continue
+        cmd.append(f"--exclude={p}")
+    if dry:
+        cmd.append("-n")
+    cmd += [src_dir.rstrip("/") + "/", os.path.join(dst_dir, "").rstrip("/") + "/"]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode not in (0, 23, 24):  # 23/24：部分文件 vanish，许可——此处保守视为错误
+        sys.stderr.write(proc.stderr)
+        raise SystemExit(f"rsync 失败 (code={proc.returncode}): {' '.join(cmd)}")
+    return proc.stdout
+
+
+def parse_itemize(raw, dst_dir):
+    """把 rsync -i 输出分类为 new/modified/delete/meta。
+    兼容 GNU rsync（11 位标志）与 openrsync（9 位标志）：一律以第一个空格切分
+    flags 与 path，不固定位数。
+    """
+    new, modified, delete, meta = [], [], [], []
+    for line in raw.splitlines():
+        line = line.rstrip()
+        if not line or line.startswith(("sending incremental file list",
+                                        "receiving file list", "building file list",
+                                        "sent ", "total size", "rsync")):
+            continue
+        if line.startswith("*deleting "):
+            delete.append(line[len("*deleting "):].strip())
+            continue
+        sp = line.find(" ")
+        if sp == -1:
+            modified.append("[unparsed] " + line)
+            continue
+        flags, path = line[:sp], line[sp + 1:].strip()
+        if not path or path in (".", "./") or path.endswith("/"):
+            continue  # 目录项，跳过
+        if flags[0] == ".":
+            continue  # 无变化
+        name = os.path.basename(path)
+        if name == META_NAME:
+            meta.append(path)
+            continue
+        full = os.path.join(dst_dir, path)
+        (modified if os.path.exists(full) else new).append(path)
+    return {"new": new, "modified": modified, "delete": delete, "meta": meta}
+
+
+# ---------- 辅助 ----------
+
+def now_iso():
+    return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+def human(n):
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if n < 1024 or unit == "TB":
+            return f"{n:.0f} {unit}" if unit == "B" else f"{n:.1f} {unit}"
+        n /= 1024
+
+def default_ignore_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "syncignore")
+
+def load_ignore(path):
+    """读取 gitignore 风格排除文件，返回原始行列表（含空行/注释，由 pat_cores 归一化）。"""
+    if not path or not os.path.isfile(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read().splitlines()
+
+def pat_cores(patterns):
+    """归一化：去尾斜杠、跳过空行与 # 注释，返回用于匹配的核心模式。"""
+    out = []
+    for p in patterns:
+        p = p.strip()
+        if not p or p.startswith("#"):
+            continue
+        out.append(p.rstrip("/"))
+    return out
+
+def name_excluded(name, cores):
+    return any(fnmatch(name, c) for c in cores)
+
+def list_local_subdirs(volume_dir, patterns=None):
+    cores = pat_cores(patterns or [])
+    if not os.path.isdir(volume_dir):
+        return []
+    out = []
+    for name in sorted(os.listdir(volume_dir)):
+        full = os.path.join(volume_dir, name)
+        if os.path.isdir(full) and not name.startswith(".") \
+           and not name_excluded(name, cores):
+            out.append(name)
+    return out
+
+
+# ---------- plan ----------
+
+def cmd_plan(args):
+    volume_dir = args.volume
+    machine = args.machine
+    mount = os.path.abspath(args.mount_point)
+    target_root = target_root_of(mount)
+
+    if not os.path.isdir(mount):
+        sys.exit(f"挂载点不存在: {mount}")
+    if not os.path.isdir(volume_dir):
+        sys.exit(f"volume 目录不存在: {volume_dir}")
+
+    os.makedirs(target_root, exist_ok=True)
+
+    patterns = load_ignore(args.ignore)
+    all_local = list_local_subdirs(volume_dir)
+    local_subs = list_local_subdirs(volume_dir, patterns)
+    ignored_local = [s for s in all_local if s not in local_subs]
+    disk_subs = list_local_subdirs(target_root)
+
+    owned, will_claim, skipped = [], [], []
+    for sub in local_subs:
+        m = read_meta(volume_dir, sub)
+        if m is None:
+            will_claim.append(sub)   # 未声明 → 本次声明本机为 owner，纳入同步
+            owned.append(sub)
+        elif m.get("owner") == machine:
+            owned.append(sub)
+        else:
+            skipped.append((sub, m.get("owner", "?")))
+
+    kept = [s for s in disk_subs if s not in local_subs]  # 盘上有本地无 → 保留
+
+    subdirs_plan = []
+    for sub in owned:
+        src = os.path.join(volume_dir, sub)
+        dst = os.path.join(target_root, sub)
+        snap, nfiles = snapshot(volume_dir, sub, patterns)
+        raw = rsync_run(src, dst, dry=True, patterns=patterns)
+        changes = parse_itemize(raw, dst)
+        subdirs_plan.append({
+            "name": sub,
+            "owner_before": (read_meta(volume_dir, sub) or {}).get("owner"),
+            "claim": sub in will_claim,
+            "snapshot": snap,
+            "files": nfiles,
+            "changes": changes,
+        })
+
+    plan = {
+        "version": 1,
+        "created": now_iso(),
+        "machine": machine,
+        "volume_dir": volume_dir,
+        "target_root": target_root,
+        "subdirs": subdirs_plan,
+        "skipped_not_owner": [{"name": s, "owner": o} for s, o in skipped],
+        "kept_on_disk": kept,
+        "ignore_patterns": patterns,
+        "ignored_local": ignored_local,
+    }
+    plan_file = plan_path_of(mount)
+    with open(plan_file, "w", encoding="utf-8") as f:
+        json.dump(plan, f, ensure_ascii=False, indent=2, sort_keys=True)
+
+    print_plan_report(plan)
+    print()
+    print(f"plan 已写入: {plan_file}")
+    print(f"确认无误后执行: {sys.argv[0]} apply {mount}")
+    return 0
+
+
+def print_plan_report(plan):
+    print("=" * 60)
+    print(f"volume 同步计划  (machine={plan['machine']})")
+    print(f"  源:   {plan['volume_dir']}")
+    print(f"  目标: {plan['target_root']}")
+    print("=" * 60)
+    total_new = total_mod = total_del = 0
+    for sd in plan["subdirs"]:
+        ch = sd["changes"]
+        tag = " [首次声明本机为 owner]" if sd["claim"] else ""
+        print(f"\n## 子目录 {sd['name']}{tag}  ({sd['files']} 个文件)")
+        if ch["new"]:
+            print(f"  新增 ({len(ch['new'])}):")
+            for p in ch["new"]:
+                print(f"    + {p}")
+        if ch["modified"]:
+            print(f"  修改 ({len(ch['modified'])}):")
+            for p in ch["modified"]:
+                print(f"    ~ {p}")
+        if ch["delete"]:
+            print(f"  删除 ({len(ch['delete'])}):")
+            for p in ch["delete"]:
+                print(f"    - {p}")
+        if not (ch["new"] or ch["modified"] or ch["delete"]):
+            print("  无变化")
+        total_new += len(ch["new"]); total_mod += len(ch["modified"]); total_del += len(ch["delete"])
+    if plan.get("ignored_local"):
+        print(f"\n## 本地忽略（syncignore 规则，不参与同步）")
+        for s in plan["ignored_local"]:
+            print(f"    ~ {s}")
+    if plan["skipped_not_owner"]:
+        print(f"\n## 跳过（owner 非本机，不动）")
+        for s in plan["skipped_not_owner"]:
+            print(f"    ! {s['name']}  (owner={s['owner']})")
+    if plan["kept_on_disk"]:
+        print(f"\n## 盘上保留（本地无此子目录，归档不动）")
+        for s in plan["kept_on_disk"]:
+            print(f"    = {s}")
+    print("\n" + "-" * 60)
+    print(f"合计: 新增 {total_new} / 修改 {total_mod} / 删除 {total_del}")
+
+
+# ---------- apply ----------
+
+def cmd_apply(args):
+    volume_dir = args.volume
+    machine = args.machine
+    mount = os.path.abspath(args.mount_point)
+    plan_file = plan_path_of(mount)
+
+    if not os.path.isfile(plan_file):
+        sys.exit(f"找不到 plan 文件: {plan_file}\n请先运行 plan。")
+    with open(plan_file, "r", encoding="utf-8") as f:
+        plan = json.load(f)
+
+    if plan.get("machine") != machine:
+        sys.exit(f"plan 的 machine={plan.get('machine')} 与当前 machine={machine} 不一致，拒绝执行。")
+    if os.path.abspath(plan["volume_dir"]) != os.path.abspath(volume_dir):
+        sys.exit(f"plan 的 volume_dir 与当前不一致，拒绝执行。")
+
+    patterns = plan.get("ignore_patterns", [])
+    # 复验：每个 owned 子目录源快照必须与 plan 一致（用 plan 记录的 ignore 规则）
+    for sd in plan["subdirs"]:
+        snap, _ = snapshot(volume_dir, sd["name"], patterns)
+        if snap != sd["snapshot"]:
+            sys.exit(f"复验失败：子目录 {sd['name']} 在 plan 之后被改动过。\n"
+                     f"请重新运行 plan。")
+
+    print(f"复验通过，开始同步到 {plan['target_root']} ...")
+    done = []
+    for sd in plan["subdirs"]:
+        src = os.path.join(volume_dir, sd["name"])
+        dst = os.path.join(plan["target_root"], sd["name"])
+        os.makedirs(dst, exist_ok=True)
+        # 先写/更新本地 .volume_meta（owner + last_sync），再 rsync，使 meta 随本次同步上盘
+        write_meta(volume_dir, sd["name"], machine)
+        rsync_run(src, dst, dry=False, patterns=patterns)
+        done.append(sd["name"])
+        print(f"  ✓ {sd['name']}")
+
+    manifest = {
+        "synced_at": now_iso(),
+        "machine": machine,
+        "volume_dir": volume_dir,
+        "target_root": plan["target_root"],
+        "subdirs": done,
+        "skipped_not_owner": plan["skipped_not_owner"],
+        "kept_on_disk": plan["kept_on_disk"],
+    }
+    mp = os.path.join(plan["target_root"], MANIFEST_NAME)
+    with open(mp, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2, sort_keys=True)
+
+    os.remove(plan_file)
+    print(f"\n同步完成。manifest: {mp}")
+    return 0
+
+
+# ---------- main ----------
+
+def main():
+    ap = argparse.ArgumentParser(description="volume 单向同步到外接盘（plan/apply 两阶段）")
+    ap.add_argument("--volume", default=default_volume(), help=f"本地 volume 目录（默认 {default_volume()}）")
+    ap.add_argument("--machine", default=hostname_short(), help="机器标识（默认 hostname）")
+    ap.add_argument("--ignore", default=default_ignore_path(),
+                    help=f"syncignore 文件（默认 {default_ignore_path()}）")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p_plan = sub.add_parser("plan", help="只读 dry-run，产出待确认的计划")
+    p_plan.add_argument("mount_point", help="外接盘挂载点，如 /Volumes/MyDisk")
+
+    p_apply = sub.add_parser("apply", help="复验 plan 后真同步")
+    p_apply.add_argument("mount_point", help="外接盘挂载点")
+
+    args = ap.parse_args()
+    if args.cmd == "plan":
+        sys.exit(cmd_plan(args))
+    elif args.cmd == "apply":
+        sys.exit(cmd_apply(args))
+
+
+if __name__ == "__main__":
+    main()
