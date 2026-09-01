@@ -100,7 +100,7 @@
 | L4 控制与 AI | 学 | learn/l4-控制与ai/（未建） | ⚪ |
 | L5 生物力学与老年科学 | 学 | learn/l5-生物力学/（未建） | ⚪ |
 | L6 人因标准合规 | 学 | learn/l6-人因合规/（未建） | ⚪ |
-| OpenExo 论文精读 | 学 | learn/openexo-精读/ | 🟡 精读中——第一章完成（08-31，5 概念 0.5–0.8） |
+| OpenExo 论文精读 | 学 | learn/openexo-精读/ | 🟡 精读中——第一章完成、第二章 1/2 收口中（08-31） |
 | P0 仿真复现 | 做 | exo-sim 仓（gitee: bingwang1230/exo-sim；MBP 主力 + mini `~/code/exo-sim` 克隆） | 🟡 MuJoCo 环境 + leg0 摆腿模型已跑通（08-31），建模继续 |
 | P1 单关节实物 | 做 | 代码仓库 + 台账（未建） | ⚪ |
 | 个人网站 | 发·子产品 | `~/code/bingwang1230-site`（gitee: bingwang1230/bingwang1230-site；规划文档 pebble_space:`products/site/`） | 🟢 已上线（09-01，bingwang1230.com，首篇已发） |
