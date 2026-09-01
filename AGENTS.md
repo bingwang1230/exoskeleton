@@ -35,6 +35,7 @@
 - **做完事必须落账**：任何推进（勾任务、新决策、新报告、学习进度）当场写入对应文件并 git 提交；周记每周日至少一行。
 - **决策**：改变需求/边界/计划的，先写 `docs/决策记录.md` 再动手；反悔不删旧条目，新增覆盖性条目。
 - **git**：`main` 唯一长期分支；commit 中文，格式 `<前缀>: <描述>`；前缀：`docs:` `progress:` `learn:` `report:` `content:` `code:` `clean:`。
+- **双远端镜像**（2026-09-01）：gitee 与 github 同内容镜像。`origin` 配了两个 pushURL，`git push origin main` 一条命令同推两家；**禁止单独 push 单个远端**；push 后跑 `bash scripts/check-mirrors.sh` 自检一致性，不一致必须当场修复。
 
 ## 5. 「接下来做什么」协议（用户问"接下来干嘛"时）
 
