@@ -1,3 +1,7 @@
 .DS_Store
 .pi/
 learn/*/materials/
+.env
+.env.*
+*.key
+daily-pm-run
