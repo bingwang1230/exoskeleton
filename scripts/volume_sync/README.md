@@ -22,6 +22,7 @@
 | `视频/` | B站 / YouTube 成片、工程文件 |
 | `录屏/` | OBS 原始录屏（S-001 等） |
 | `截图/` | 素材截图（Bark、网站、viewer 等） |
+| `文章/` | site posts 发布前的文章备份（`YYYYMMDD.{主题}.md`，决策十三） |
 
 多机注意：首台运行同步的机器自动成为各子目录 owner（`.volume_meta`）。MBP 侧要写入
 某子目录前，先在其中放 `.volume_meta`（`{"owner": "<mbp主机名>"}`）声明，否则 mini
