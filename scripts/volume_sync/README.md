@@ -11,6 +11,7 @@
 - 源：`~/exoskeleton/volume/`（.gitignore 忽略，媒体成品与原始文件）
 - 目标：`/Volumes/ext2/exoskeleton_volume/`（与 pebble_volume 平行，互不干扰）
 - `syncignore`：只排除同步自身日志（volume-sync*，自反馈权，同 pebble）
+- 失败告警（2026-09-02 补）：任何非零退出（含盘未挂载）即 Bark 推送（key 沿用 `~/.bark_key`，同 daily-pm 模式）；成功不推送；深夜推送可在 Bark App 内对 group 设免打扰。
 - 自动化授权：用户明确授权的「常设确认」（同 pebble 模式），自动运行不再逐次看报告；
   想人工把关就手动 `./volume_sync plan /Volumes/ext2` 看报告再 apply。
 
