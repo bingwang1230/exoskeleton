@@ -6,3 +6,4 @@ learn/*/materials/
 *.key
 daily-pm-run
 volume/
+__pycache__/
