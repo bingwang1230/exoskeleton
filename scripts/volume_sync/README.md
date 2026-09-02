@@ -1,7 +1,7 @@
-# exoskeleton volume → 外接盘(ext2) 每周自动同步
+# exoskeleton volume → 外接盘(ext2) 自动同步（2026-09-02 决策十四：周日→每日）
 
-由 launchd 任务 `local.exoskeleton-volume-sync` 每周日 03:40 触发（pebble volume_sync
-03:15 之后错峰）。ext2 常驻 Mac mini；当日未挂载则记日志跳过（exit 4）。
+由 launchd 任务 `local.exoskeleton-volume-sync` 每日 03:40 触发（pebble volume_sync
+03:15 之后错峰；脚本文件名沿用 sync-weekly.sh）。ext2 常驻 Mac mini；当日未挂载则记日志跳过（exit 4）。
 
 设计（两阶段 plan→apply、owner 元数据、严格单向、盘上归档保留）**与 pebble_space
 `products/volume_sync/` 完全同源**——本目录的 `volume_sync` 即该脚本的适配副本，

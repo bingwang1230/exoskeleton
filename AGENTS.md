@@ -20,7 +20,7 @@
 | `learn/` | 学科学习（L1–L6），每科一个子目录，协议见 `learn/learn.md` |
 | `content/` | 内容素材台账（INDEX + 文本条目；**只放素材，成品不放**，纪律见 §10） |
 | `scripts/` | 运维脚本（daily-pm 提醒、volume_sync 外接盘备份） |
-| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git，每周日自动同步 ext2，见 `scripts/volume_sync/`） |
+| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git，每日 03:40 自动同步 ext2，见 `scripts/volume_sync/`） |
 | 代码工件 | 不在本仓库：网站/仿真等开工时各自独立建仓，链接登记进 PROGRESS.md 卫星索引 |
 
 ## 3. 铁律（违者按编造或越权处理）
@@ -89,7 +89,7 @@
 
 ## 10. 素材库纪律（2026-08-31 决策十；2026-09-01 决策十二 v2：素材/成品分离）
 
-- **素材与成品分离**：`content/` 只放素材——INDEX 台账 + 文本素材条目（短的入 INDEX，长的独立 `content/YYYYMMDD-短名.md`），commit 前缀 `content:`。**成品不入本仓 content/**：媒体成品与原始文件（小红书图文/B站·YouTube 视频/录屏/截图）进 `volume/`（不入 git，每周日 03:40 自动同步 `/Volumes/ext2/exoskeleton_volume`，见 `scripts/volume_sync/`）；文字成品（拟发布站上的文章）先备份到 `volume/文章/`（`YYYYMMDD.{主题}.md`，2026-09-02 决策十三），再进 site 仓 `content/posts/`（进 git，写作即状态机）。
+- **素材与成品分离**：`content/` 只放素材——INDEX 台账 + 文本素材条目（短的入 INDEX，长的独立 `content/YYYYMMDD-短名.md`），commit 前缀 `content:`。**成品不入本仓 content/**：媒体成品与原始文件（小红书图文/B站·YouTube 视频/录屏/截图）进 `volume/`（不入 git，每日 03:40 自动同步 `/Volumes/ext2/exoskeleton_volume`，2026-09-02 决策十四由每周日改每日，见 `scripts/volume_sync/`）；文字成品（拟发布站上的文章）先备份到 `volume/文章/`（`YYYYMMDD.{主题}.md`，2026-09-02 决策十三），再进 site 仓 `content/posts/`（进 git，写作即状态机）。
 - **台账与状态流转**：`content/INDEX.md` 为唯一台账，两区——「待拍摄」（提醒用）与「已入库」（文本/指针）。状态：⬜ 未拍/未做 → 🟡 进行中 → ✅ 已归档（素材已用掉，**当场标归档并附成品指针**：site slug 或 volume 路径）；废稿标「弃」。台账只增不删。
 - **入库判据**：能回答「服务哪条产品线（B站/小红书/YouTube/网站）+ 服务哪个叙事（一个人+AI 造外骨骼）」的才入；纯过程噪音不入。
 - **自动记录触发（AI 职责，无需用户要求）**：

@@ -1,6 +1,6 @@
 #!/bin/bash
-# exoskeleton volume → 外接盘(ext2) 每周自动同步
-# launchd local.exoskeleton-volume-sync 每周日 03:40（pebble volume_sync 03:15 之后错峰）。
+# exoskeleton volume → 外接盘(ext2) 自动同步（2026-09-02 决策十四：周日→每日；文件名沿用 sync-weekly.sh）
+# launchd local.exoskeleton-volume-sync 每日 03:40（pebble volume_sync 03:15 之后错峰）。
 # 两阶段协议说明：本脚本是用户明确授权的「常设确认」——自动执行时不再逐次等人工看
 # 报告，但仍严格走 volume_sync 自身两阶段（plan 只读 → apply 前复验源未变），
 # 不绕过、不直调 rsync。异常以非零码退出并留日志。设计详见同目录 README.md。
