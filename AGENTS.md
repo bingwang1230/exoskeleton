@@ -81,6 +81,7 @@
 - **mac mini（日常主力机）**：轻负载——文档、写作、浏览、仓库维护。**daily-pm（launchd 08:00 + schedule 兑底 + stamp/Bark）只部署在此机**；MBP 一律不配，避免双机重复提醒。
 - **MacBook Pro（M4 Max / 128G，重负载机）**：吃配置的环境与开发放这里——MuJoCo/MJX GPU 并行仿真、批量优化、重渲染、大构建。与 mini 同 tailnet，可经 `server_debug(host=mbp)` SSH 诊断（只读向，破坏性命令会被拒）；重部署优先在 MBP 上直接开 pi 会话执行。
 - 两机各自 clone 本仓库；任何跨机操作前先 `git pull` 对齐。
+- **agent 不得凭空假设自己在哪台机器**（2026-09-01 补）：会话开始涉及本机操作时，先探测环境（如 `hostname` / `sysctl hw.model` / `uname -m`，M 系列重负载 + 本地已装 exo-sim 环境通常即 MBP）再行动；同时意识到用户本人不一定在本机前——可能在另一台电脑前（经 SSH/远程），或在移动端（仅接收推送、无法操作 GUI）。需要用户看画面/操作 GUI（viewer、OBS、扫码）时，先确认「你现在在 MBP 前、能看到屏幕吗」再启动带窗口的程序。
 - 分层原则：基础 MuJoCo 验证任一机器可跑；MJX/GPU 批量与重渲染默认 MBP。
 
 ## 10. 素材库纪律（2026-08-31，决策十）
