@@ -105,7 +105,7 @@
 | P0 仿真复现 | 做 | exo-sim 仓（gitee: bingwang1230/exo-sim；MBP 主力 + mini `~/code/exo-sim` 克隆） | 🟡 MuJoCo 环境 + leg0 摆腿模型已跑通（08-31），建模继续 |
 | P1 单关节实物 | 做 | 代码仓库 + 台账（未建） | ⚪ |
 | 个人网站 | 发·子产品 | `~/code/bingwang1230-site`（gitee: bingwang1230/bingwang1230-site；规划文档 pebble_space:`products/site/`） | 🟢 已上线（09-01，bingwang1230.com，首篇已发） |
-| 素材库 | 发·基建 | content/INDEX.md（台账）+ volume/（媒体，不入 git） | 🟢 v2（决策十二：素材/成品分离 + ext2 周备份） |
+| 素材库 | 发·基建 | content/INDEX.md（台账）+ volume/（媒体，不入 git） | 🟢 v3（决策十五：四区消耗管理 + 发布即清账 + 成品台账反引入；当前水位：可用 11 文本 + 3 待拍） |
 | 小红书 | 发 | 平台账号 https://xhslink.cn/o/31sOOIHpVVV （09-01 开户；09-03 凌晨首帖，帖 https://xhslink.cn/o/5j19DEuir0B ；站内改名用户推迟） | 🟢 已开口 |
 | 小红书文字卡片（red_poster） | 发·基建 | pebble_space `skills/red_poster/`（会话 01a0605a；纸墨/寸草两套规范，md→三版候选→Chrome 截图→归档 volume/） | 🟢 首贴全流程实证（09-03） |
 | B站 | 发 | 平台账号（未开户） | ⚪ |
@@ -133,3 +133,4 @@
 - **2026-09-02（三）**：PM 兜底 schedule 修复——pi-subagents v1 权限模型收紧，旧 schedule 的 `runs.host` 调用失权，每日 08:00 报错（提醒本体不受影响：launchd 08:00:26 照常 OK）。改法：兜底层由 delegate 子 agent 执行 `scripts/daily-pm.sh`（幂等仍靠 stamp）；此版本日历锚定不可用，改 24h 固定间隔（锚点=创建时刻 ~08:07，漂移无碍）。旧 daily-pm 已删，新 a966415f 明早首跑。
 - **2026-09-02（三）补**：备份基建三连——①决策十三：volume/文章/ 备份层（文章进 site posts 前先备份，YYYYMMDD.主题.md），首篇已备份上盘；②volume_sync 修中文文件名同步崩溃（openrsync 半转义混合流非合法 UTF-8，exoskeleton/pebble 两仓同修）；③决策十四：两仓 volume 同步周日→每日（03:15/03:40），launchd kickstart 实跑双过；发现 pebble 08-30 周同步曾静默失败（EINTR 挂 26 分钟、launchd 退码 5 无人见，自 08-26 起未成功备份），积压 37 项（jam 1.4G）随首跑上盘——同步失败无通知的缺口已当日补上（非零退出 Bark 推送，两仓同装，失败路径与真实送达双验证）。
 - **2026-09-03（四）**：兜底 schedule a966415f 首跑实证通过（08:06:56 delegate 执行 daily-pm.sh，stamp 已是今日→幂等跳过，与 launchd 08:00 主触发正确去重，无重复会话/推送）——09-02 修复项闭环，PM 双触发链全绿。
+- **2026-09-03（四）补**：素材库升 v3 消耗管理（决策十五，用户提案：首帖消耗未清账→AI 扫描满眼旧货）——两类消耗语义（S 单用途 / T 可复用跨平台 🔁）、INDEX 四区重构 + 库存水位行 + 成品台账反向索引、发布即清蛋与素材饥渴水位线写进 AGENTS §6/§10；补账 C-001 首帖（消耗 T-010 叙事复用/T-006/S-004/S-005）与 C-002 网站首篇，成品反哺新登 T-014（pi web 外壳）、T-015（学习 SKILL）。当前水位：可用 11 文本 + 3 待拍。
