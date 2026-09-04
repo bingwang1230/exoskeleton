@@ -1,6 +1,6 @@
 # 《OpenExo: An Open-Source Modular Exoskeleton to Augment Human Function》学习进度
 
-> 最后更新：2026-09-02（第二章完成：概念1「七条设计目标及其取舍」0.75、概念2「模块化如何嵌入每一层」0.75，会话总结见 notes/20260831_第二章学思笔记.md；第一章完成 5 概念 0.5–0.8；术语表开篇 notes/术语表.md）
+> 最后更新：2026-09-04（第三章进行中：概念1「双 MCU 分工」0.5——黑话画面齐/时间隔离已立，UART 时序契约检验题待答，笔记 notes/ch03_双MCU分工.md；第二章完成两概念 0.75；术语表 notes/术语表.md）
 > 材料：`materials/OpenExo_全文（整理版）.md`（AI 整理）+ `materials/OpenExo_ScienceRobotics2025.pdf`（正式版原文）
 > 论文：Science Robotics 2025-06-25（biorxiv 2024-10-03 预印本）｜配套工程精读笔记：`../../../reports/20260830.OpenExo精读初稿.md`
 > 学习目标：吃透踝构型的硬件与控制（P1 复现对象），建立可写进仿真的参数表
@@ -26,7 +26,7 @@
 
 | 概念 | 掌握度 | 笔记文件 |
 |------|--------|----------|
-| 双 MCU 分工（Teensy 4.1 控制 / Nano BLE 33 通信） | 0.0 | - |
+| 双 MCU 分工（Teensy 4.1 控制 / Nano BLE 33 通信） | 0.5 | notes/ch03_双MCU分工.md |
 | 继承多态与层级结构（Exo→Side→Joint→控制器/传感器/电机） | 0.0 | - |
 | SD 卡配置化（换构型不改代码） | 0.0 | - |
 
