@@ -1,6 +1,6 @@
 # 《OpenExo: An Open-Source Modular Exoskeleton to Augment Human Function》学习进度
 
-> 最后更新：2026-09-04（第三章概念2「继承多态与层级」0.6——策略/组合两种关系+数据树硬理由(Nano只要账本)已立，检验题未答中；概念1已收口0.7；第二章完成两概念 0.75；术语表 notes/术语表.md）
+> 最后更新：2026-09-04（**第三章完成**：概念1「双 MCU 分工」0.7、概念2「继承多态与层级」0.6、概念3「SD 卡配置化」0.7；学思笔记 notes/20260904_第三章学思笔记.md；最大事件：「App 在环外」安全级误解纠正+迁移答创始人 LLM 问题（T-016 入库）；第二章完成两概念 0.75）
 > 材料：`materials/OpenExo_全文（整理版）.md`（AI 整理）+ `materials/OpenExo_ScienceRobotics2025.pdf`（正式版原文）
 > 论文：Science Robotics 2025-06-25（biorxiv 2024-10-03 预印本）｜配套工程精读笔记：`../../../reports/20260830.OpenExo精读初稿.md`
 > 学习目标：吃透踝构型的硬件与控制（P1 复现对象），建立可写进仿真的参数表
@@ -28,6 +28,7 @@
 |------|--------|----------|
 | 双 MCU 分工（Teensy 4.1 控制 / Nano BLE 33 通信） | 0.7 | notes/ch03_双MCU分工.md |
 | 继承多态与层级结构（Exo→Side→Joint→控制器/传感器/电机） | 0.6 | notes/ch03_继承多态与层级.md |
+| SD 卡配置化（换构型不改代码） | 0.7 | notes/ch03_SD卡配置化.md |
 | 继承多态与层级结构（Exo→Side→Joint→控制器/传感器/电机） | 0.0 | - |
 | SD 卡配置化（换构型不改代码） | 0.0 | - |
 
