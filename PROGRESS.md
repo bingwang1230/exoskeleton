@@ -88,6 +88,7 @@
 | L3 电子动力 | 力矩控制跑通一个电机（moteus/ODrive 或国产等价） | 待排 | ⚪ |
 | L5 生物力学与老年科学 | 基线测试方法学笔记 + 步态周期基础 | 待排 | ⚪ |
 | OpenExo 论文精读（伴读） | 五问批注闭环 + 复现参数表（对接 P0 仿真） | 本周（08-30~09-05） | 🟡 |
+| MuJoCo 仿真与建模 | 按 OpenExo 参数自建踝关节模型 + 力控闭环（对接 P0/L1） | 本周起（09-03 开科） | 🟡 |
 
 ## 5. 卫星工作流索引
 
@@ -102,6 +103,7 @@
 | L5 生物力学与老年科学 | 学 | learn/l5-生物力学/（未建） | ⚪ |
 | L6 人因标准合规 | 学 | learn/l6-人因合规/（未建） | ⚪ |
 | OpenExo 论文精读 | 学 | learn/openexo-精读/ | 🟡 精读中——前两章完成（7 概念 0.5–0.75，08-31），下次第三章软件架构 |
+| MuJoCo 仿真与建模 | 学 | learn/mujoco-sim/ | 🟡 开科（09-03）——第一章 viewer/leg0 进行中 |
 | P0 仿真复现 | 做 | exo-sim 仓（gitee: bingwang1230/exo-sim；MBP 主力 + mini `~/code/exo-sim` 克隆） | 🟡 MuJoCo 环境 + leg0 摆腿模型已跑通（08-31）；viewer 实操上手：拖拽/改 XML + OBS 双场景录制（09-03，会话 01a0655a），建模继续 |
 | P1 单关节实物 | 做 | 代码仓库 + 台账（未建） | ⚪ |
 | 个人网站 | 发·子产品 | `~/code/bingwang1230-site`（gitee: bingwang1230/bingwang1230-site；规划文档 pebble_space:`products/site/`） | 🟢 已上线（09-01，bingwang1230.com，首篇已发） |
