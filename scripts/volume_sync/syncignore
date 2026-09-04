@@ -1,0 +1,4 @@
+# volume 同步排除规则（gitignore 风格 glob，相对 volume 根）
+# 与 pebble 同源。这里只排除同步工具自身日志：
+# 每次运行在 plan 与 apply 之间持续追加，不排除的话 apply 复验会恒失败（自反馈权）。
+volume-sync*

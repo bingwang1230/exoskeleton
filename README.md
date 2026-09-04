@@ -34,4 +34,11 @@
 ## Git
 
 - `main` 唯一长期分支；commit 中文，`<前缀>: <描述>`（前缀见 AGENTS.md §4）。
-- 远端：`git@gitee.com:bingwang1230/exoskeleton.git`（私有仓；公开部分后续按代码工件拆）。
+- 远端：`git@gitee.com:bingwang1230/exoskeleton.git`（公开仓，2026-09-01 开源）。
+- 敏感边界：Bark key / API key 只走 env 或 `~/.bark_key`，不入库；`learn/*/materials/`（版权材料）与 `.pi/`（本地状态）被 git 忽略。
+
+## 许可证
+
+- 代码与脚本：[MIT](LICENSE)
+- 文档、笔记与素材：[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.zh)（署名「外骨骼兵老师」+ 相同方式共享）
+- 范围划分见 [LICENSE](LICENSE) 尾部说明。
