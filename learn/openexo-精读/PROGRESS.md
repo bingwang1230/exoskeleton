@@ -1,6 +1,6 @@
 # 《OpenExo: An Open-Source Modular Exoskeleton to Augment Human Function》学习进度
 
-> 最后更新：2026-09-04（**第三章完成**：概念1「双 MCU 分工」0.7、概念2「继承多态与层级」0.6、概念3「SD 卡配置化」0.7；学思笔记 notes/20260904_第三章学思笔记.md；第四章开讲：概念1「单 PCB 设计」0.5（四角色/单块哲学/插拔哲学已立，用户 Mac 同构✓）；第二章完成两概念 0.75）
+> 最后更新：2026-09-04（**第三、四章完成**。第四章：概念1「单 PCB 设计」0.5、概念2「CAN 与 AK 选型」0.6（三张账对拍/质量价格表/CAN 契约收口）；第三章三概念 0.6–0.7，学思笔记 notes/20260904_第三章学思笔记.md；第二章两概念 0.75）
 > 材料：`materials/OpenExo_全文（整理版）.md`（AI 整理）+ `materials/OpenExo_ScienceRobotics2025.pdf`（正式版原文）
 > 论文：Science Robotics 2025-06-25（biorxiv 2024-10-03 预印本）｜配套工程精读笔记：`../../../reports/20260830.OpenExo精读初稿.md`
 > 学习目标：吃透踝构型的硬件与控制（P1 复现对象），建立可写进仿真的参数表
@@ -37,7 +37,7 @@
 | 概念 | 掌握度 | 笔记文件 |
 |------|--------|----------|
 | 单 PCB 设计（4 电机/双侧 2 关节/8-pin 传感扩展） | 0.5 | notes/ch04_单PCB设计.md |
-| CAN 总线与 CubeMars AK 系列选型逻辑（AK60 vs AK80-9） | 0.0 | - |
+| CAN 总线与 CubeMars AK 系列选型逻辑（AK60 vs AK80-9） | 0.6 | notes/ch04_CAN与AK选型.md |
 
 ## 五、硬件构型
 
