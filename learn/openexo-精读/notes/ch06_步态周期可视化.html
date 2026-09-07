@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenExo 髋助力曲线 · 步态周期走读</title>
+<title>OpenExo 髋助力曲线 · 步态周期走读（3 连周期）</title>
 <style>
-  :root{--ink:#2b2a27;--paper:#faf7f2;--line:#d8d2c6;--stance:#eef3f8;--swing:#eef6ee;--load:#faf3e3;}
+  :root{--ink:#2b2a27;--paper:#faf7f2;--line:#d8d2c6;}
   *{box-sizing:border-box}
   body{margin:0;padding:32px 20px 60px;background:var(--paper);color:var(--ink);
        font:15px/1.7 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
@@ -16,13 +16,13 @@
   .legend .k{display:inline-block;width:22px;height:0;border-top:3px solid;margin-right:5px;vertical-align:middle}
   #wrap{position:relative;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
   #tip{position:absolute;display:none;pointer-events:none;background:#2b2a27;color:#f5f1e8;
-       font-size:12.5px;line-height:1.55;padding:8px 11px;border-radius:8px;max-width:280px;z-index:5}
+       font-size:12.5px;line-height:1.55;padding:8px 11px;border-radius:8px;max-width:290px;z-index:5}
   #tip b{color:#ffd9a0}
   table{border-collapse:collapse;width:100%;font-size:13.5px;background:#fff;margin-top:26px}
   th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
   th{background:#f1ece2;font-weight:600;white-space:nowrap}
   td.ph{white-space:nowrap;font-weight:600}
-  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:0}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
   .note{font-size:13px;color:#6b6559;margin-top:8px}
   h2{font-size:16px;margin:30px 0 8px}
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -30,145 +30,168 @@
   .card h3{margin:0 0 6px;font-size:14px}
   details{margin-top:22px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:12px 16px}
   summary{cursor:pointer;font-weight:600}
-  .warn{color:#a05a1e}
 </style>
 </head>
 <body>
 <div class="page">
-  <h1>OpenExo 髋外骨骼助力曲线 · 步态周期走读</h1>
-  <div class="sub">坐标：一只脚（右脚 R）连续两次跟落地 = 一个周期。<b>0% = 右脚跟击瞬间，100% = 下一次右脚跟击</b>（曲线首尾相接转圈）。中间的 % = 从这次跟击起过了周期长度的百分之几。左脚（L）比右脚晚半个周期（L 的跟击发生在 R 的 50% 处）。</div>
+  <h1>OpenExo 髋外骨骼助力曲线 · 步态周期走读（3 个连续周期）</h1>
+  <div class="sub">横轴 = 连续 3 个周期（0–300%）。<b>右脚 R 每逢 0/100/200/300% 跟击，左脚 L 每逢 50/150/250% 跟击</b>——两条曲线同形状，错开半周期，如此往复。周期内的 % 定义不变：从本周期跟击起过了周期长度的百分之几。</div>
 
   <div class="legend">
-    <span><span class="k" style="border-color:#c2571f"></span>右脚·伸助力峰 ~5.5 Nm（实线橙）</span>
-    <span><span class="k" style="border-color:#7a4fa3"></span>右脚·屈助力峰 ~5.0 Nm（实线紫）</span>
-    <span><span class="k" style="border-color:transparent;border-top-style:dashed"></span>左脚同款曲线 = 右脚整体右移 50%（虚线）</span>
-    <span><span class="k" style="border-color:#9db9cf"></span>色块背景：stance（0–60%）/ swing（60–100%）</span>
+    <span><span class="k" style="border-color:#c2571f"></span>R 伸助力 ~5.5 Nm</span>
+    <span><span class="k" style="border-color:#7a4fa3"></span>R 屈助力 ~5.0 Nm</span>
+    <span><span class="k" style="border-color:#e0b48c;border-top-style:dashed"></span>L 伸助力（虚线浅橙）</span>
+    <span><span class="k" style="border-color:#c9a9d6;border-top-style:dashed"></span>L 屈助力（虚线浅紫）</span>
+    <span><span class="k" style="border-color:#9db9cf"></span>背景：stance / swing</span>
   </div>
 
   <div id="wrap">
     <svg id="fig" viewBox="0 0 1000 560" style="display:block;width:100%"></svg>
     <div id="tip"></div>
   </div>
-  <div class="note">图上的鼠标位置会显示两脚此刻的助力与身体状态。⚠️ 曲线为<b>教学示意</b>：论文忠实项 = 84% 出发 / ~92% 峰 / 100% 归零 / 峰值 5.0 与 5.5 Nm / 升降时间用户可调；<b>峰位置与升降时长取示意值</b>（精确时序 = Franks 跨被试均值，材料未给数值，待查开源代码）。</div>
+  <div class="note">图上移动鼠标：竖线跟随，显示<b>第几个周期、周期内相位</b>、两脚各自助力与身体状态。⚠️ 曲线为<b>教学示意</b>：论文忠实项 = 84% 出发 / ~92% 峰 / 100% 归零 / 峰值 5.0 与 5.5 Nm / 升降时间用户可调；<b>峰位置与升降时长取示意值</b>（精确时序 = Franks 跨被试均值，材料未给数值，待查开源代码）。肌肉条为生理激活示意，按周期重复。</div>
 
   <table>
-    <tr><th style="width:130px">相位段</th><th>右脚 / 身体在干嘛</th><th>出力的肌肉</th><th>髋外骨骼给多少</th></tr>
+    <tr><th style="width:130px">周期内相位</th><th>右脚 / 身体在干嘛</th><th>出力的肌肉</th><th>髋外骨骼给多少</th></tr>
     <tr><td class="ph"><span class="dot" style="background:#f0d79b"></span>0–10% 落地吸收</td>
         <td>体重砸上来，腿微弯吸收冲击（loading response）</td>
-        <td>髋伸肌群<b>离心刹车</b>；踝跖肌群离心——跟腱弹簧被拉长（第一章的账，<b>踝</b>）</td>
+        <td>髋伸肌群<b>离心刹车</b>；踝跖肌群离心——跟腱弹簧被拉长（<b>踝</b>的账）</td>
         <td><b>0</b>（冲击吸收期助力反而碍事）</td></tr>
     <tr><td class="ph"><span class="dot" style="background:#f0d79b"></span>~15–40% 蹬伸</td>
         <td>身体滚过右脚上方 → 蹬直腿向前推</td>
-        <td>髋伸肌群<b>向心</b>：<b>臀大肌、腘绳肌</b>（「后腿蹬直」的髋部分）</td>
+        <td>髋伸肌群<b>向心</b>：<b>臀大肌、腘绳肌</b></td>
         <td><b>伸助力峰 ~5.5 Nm</b>（≈生理髋峰的 ~10%）</td></tr>
     <tr><td class="ph"><span class="dot" style="background:#f0d79b"></span>40–60% 蹬离</td>
         <td>脚跟抬起 → 脚趾离地</td>
-        <td><b>腓肠肌+比目鱼</b>向心蹬地——这是<b>踝</b>的账，与髋无关</td>
-        <td>0 —— 这是<b>踝外骨骼</b>（PJMC，28 Nm）的主场</td></tr>
+        <td><b>腓肠肌+比目鱼</b>向心蹬地——<b>踝</b>的账</td>
+        <td>0 —— <b>踝外骨骼</b>（PJMC，28 Nm）主场</td></tr>
     <tr><td class="ph"><span class="dot" style="background:#b5d4b5"></span>60% 脚趾离地</td>
         <td>右腿腾空，进入摆动相</td>
         <td>—</td><td>0</td></tr>
     <tr><td class="ph"><span class="dot" style="background:#b5d4b5"></span>60–84% 摆动前中</td>
-        <td>右腿自己往前摆（过身体下方→甩到身前）</td>
+        <td>右腿自己往前摆</td>
         <td>髋屈肌群向心：<b>髂腰肌、股直肌</b></td>
-        <td><b>0</b>（很长的一段零——生理屈肌发力主要在此，但 OpenExo 不在这里助力）</td></tr>
+        <td><b>0</b>（生理屈肌发力主要在此，OpenExo 不在这里助力）</td></tr>
     <tr><td class="ph"><span class="dot" style="background:#b5d4b5"></span>84–100% 摆动末段</td>
         <td>腿摆到身前、减速、准备落地</td>
         <td>髋屈肌收尾；髋伸肌预备刹车</td>
-        <td><b>屈助力：84% 出发 → ~92% 峰 → 100% 归零</b>（必须在跟击前结清，否则相位归零瞬间力矩跳变）</td></tr>
-    <tr><td class="ph">100% = 0%</td>
-        <td>右脚跟再落地 = 新周期开始</td>
-        <td>—</td>
-        <td>接缝两端都必须是 0</td></tr>
+        <td><b>屈助力：84% 出发 → ~92% 峰 → 100% 归零</b>（跟击前必须结清）</td></tr>
   </table>
 
   <h2>两本肌肉账本，别混</h2>
   <div class="cards">
     <div class="card"><h3>髋账本（本页主角）</h3>
       伸（stance 蹬伸）= <b>臀大肌、腘绳肌</b> ↔ 伸助力 5.5 Nm<br>
-      屈（摆动收腿）= <b>髂腰肌、股直肌</b> ↔ 屈助力 5.0 Nm<br>
-      外骨骼 = 同轴电机顶到大腿箍，力矩直接作用在髋。</div>
-    <div class="card"><h3>踝账本（下一个概念 PJMC 的主角）</h3>
-      跖屈（蹬地）= <b>腓肠肌、比目鱼</b> ↔ PJMC 主对象，28 Nm ≈ 生理峰的 <b>25–30%</b><br>
-      背屈（勾脚防拖地）= <b>胫骨前肌</b> ↔ PJMC 摆动相恒定背屈力矩的模仿对象<br>
-      「拉长→等长→收缩」循环 = 跟腱弹簧，发生在<b>踝</b>不在髋。</div>
+      屈（摆动收腿）= <b>髂腰肌、股直肌</b> ↔ 屈助力 5.0 Nm</div>
+    <div class="card"><h3>踝账本（下一概念 PJMC 的主角）</h3>
+      跖屈（蹬地）= <b>腓肠肌、比目鱼</b> ↔ 28 Nm ≈ 生理峰的 <b>25–30%</b><br>
+      背屈（勾脚防拖地）= <b>胫骨前肌</b> ↔ 摆动相恒定背屈力矩的对象<br>
+      「拉长→收缩」循环 = 跟腱弹簧，在<b>踝</b>不在髋。</div>
   </div>
-  <div class="note">助力量级对账：你记的「30%」是<b>踝</b>的账（28 Nm ≈ 生理踝峰 ~100+ Nm 的 25–30%）——跖屈蹬地是行走耗能大头，代谢收益主场，火力足；髋只有 <b>~10%</b>（5.5/5.0 Nm ≈ 生理髋峰 ~40–70 Nm 的零头）——搭把手定位。生理峰值数值为 AI 补的常识，待确认。</div>
+  <div class="note">量级对账：你记的「30%」是<b>踝</b>的账（28 Nm ≈ 生理踝峰 ~100+ Nm 的 25–30%，代谢收益主场）；髋只有 <b>~10%</b>——搭把手定位。生理峰值为 AI 补常识，待确认。</div>
 
-  <h2>84–100% 这个窗口的生理代价（诚实标注）</h2>
-  <div class="note">生理上髋屈肌峰发力在 <b>initial swing（60–73%）</b>——把腿从身后拉起来最费劲的时刻。OpenExo 把屈助力压到摆动<b>末段</b>（84–100%），等于不帮「启动摆动」、只帮「收尾摆到位」——这是「起点移至 84% 以避免跟击不连续」的直接代价。原方案（Bryan/Franks）曲线形状待查原文。下图中紫色肌肉条（生理激活）与紫色助力曲线（OpenExo 助力窗）的错位就是这件事。</div>
+  <h2>84–100% 窗口的生理代价（诚实标注）</h2>
+  <div class="note">生理髋屈肌峰发力在 <b>initial swing（60–73%）</b>；OpenExo 把屈助力压到摆动<b>末段</b>（84–100%）——不帮「启动摆动」、只帮「收尾摆到位」，这是「起点移 84% 避免跟击不连续」的直接代价。图中紫色肌肉条与紫色助力曲线的错位即此事。原方案（Bryan/Franks）曲线待查原文。</div>
 
   <details>
-    <summary>检验题：左脚的髋外骨骼，在右脚周期的哪个 % 附近给出屈峰？</summary>
-    <p style="margin:10px 0 2px">左脚相位 = 右脚相位 − 50（晚半个周期）。左脚自己的屈峰在左脚相位 92% → 换算到右脚周期：(92 + 50) mod 100 = <b>~42%</b>（图上紫色虚线峰的位置，你 hover 到那里看得到）。若问的是<b>出发</b>（84%）：(84+50) mod 100 = 34%。看虚线验证你的答案。</p>
+    <summary>检验题：左脚的屈峰，出现在右脚周期的哪个 % 附近？</summary>
+    <p style="margin:10px 0 2px">左脚相位 = 右脚相位 − 50。左脚屈峰在左脚相位 92% → 换算到右脚周期：(92+50) mod 100 = <b>~42%</b>。图上虚线浅紫的峰就落在 42% / 142% / 242%——hover 验证。</p>
   </details>
 </div>
 
 <script>
-const X0=62, X1=958, Y0=300, YT=44, VMAX=6;   // 力矩区
-const MB={y:336, rowH:26, gap:7};              // 肌肉条区
+const X0=62, X1=958, Y0=300, YT=44, VMAX=6, CYC=3, TOT=CYC*100;
+const MB={y:336, rowH:26, gap:7};
 const NS='http://www.w3.org/2000/svg';
 const svg=document.getElementById('fig');
 function el(n,a,txt){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;}
-const px=p=>X0+(X1-X0)*p/100;
+const px=p=>X0+(X1-X0)*p/TOT;
 const py=v=>Y0-(Y0-YT)*v/VMAX;
+const BG_BOT=MB.y+MB.rowH*4+MB.gap*3+16;
 
-// ---- 背景分段（全高）----
-[['0','10','#f7edd2'],['0','60','#eef3f8'],['60','100','#eef6ee']].forEach(([a,b,c])=>{
-  el('rect',{x:px(+a),y:30,width:px(+b)-px(+a),height:MB.y+MB.rowH*4+MB.gap*3+16-30,fill:c});
-});
-el('text',{x:px(5),y:MB.y+MB.rowH*4+MB.gap*3+12,'font-size':11,fill:'#8a8375','text-anchor':'middle'},'落地吸收');
-el('text',{x:px(32),y:MB.y+MB.rowH*4+MB.gap*3+12,'font-size':11,fill:'#7d93a8','text-anchor':'middle'},'支撑相 stance 0–60%');
-el('text',{x:px(80),y:MB.y+MB.rowH*4+MB.gap*3+12,'font-size':11,fill:'#6f9573','text-anchor':'middle'},'摆动相 swing 60–100%');
+// ---- 背景分段（每周期重复）----
+for(let c=0;c<CYC;c++){
+  el('rect',{x:px(c*100),y:30,width:px(c*100+60)-px(c*100),height:BG_BOT-30,fill:'#eef3f8'});
+  el('rect',{x:px(c*100+60),y:30,width:px(c*100+100)-px(c*100+60),height:BG_BOT-30,fill:'#eef6ee'});
+  el('rect',{x:px(c*100),y:30,width:px(c*100+10)-px(c*100),height:BG_BOT-30,fill:'#f7edd2'});
+  if(c===0){
+    el('text',{x:px(32),y:BG_BOT-2,'font-size':11,fill:'#7d93a8','text-anchor':'middle'},'支撑相 stance 0–60%');
+    el('text',{x:px(80),y:BG_BOT-2,'font-size':11,fill:'#6f9573','text-anchor':'middle'},'摆动相 swing');
+    el('text',{x:px(5),y:BG_BOT-2,'font-size':11,fill:'#8a8375','text-anchor':'middle'},'吸收');
+  }
+}
 
 // ---- 坐标轴 ----
 el('line',{x1:X0,y1:Y0,x2:X1,y2:Y0,stroke:'#8a8375','stroke-width':1});
 el('line',{x1:X0,y1:30,x2:X0,y2:Y0,stroke:'#8a8375','stroke-width':1});
 for(let v=0;v<=6;v+=2) el('text',{x:X0-8,y:py(v)+4,'font-size':11,fill:'#8a8375','text-anchor':'end'},v);
-el('text',{x:X0-14,y:YT-16,'font-size':11.5,fill:'#6b6559','text-anchor':'start'},'τ (Nm)');
-for(let p=0;p<=100;p+=10){
-  el('line',{x1:px(p),y1:Y0,x2:px(p),y2:Y0+4,stroke:'#8a8375'});
-  el('text',{x:px(p),y:Y0+18,'font-size':11,fill:'#8a8375','text-anchor':'middle'},p+'%');
+el('text',{x:X0+4,y:YT-14,'font-size':11.5,fill:'#6b6559'},'τ (Nm)');
+for(let p=0;p<=TOT;p+=25){
+  const major=p%50===0;
+  el('line',{x1:px(p),y1:Y0,x2:px(p),y2:Y0+(major?5:3),stroke:'#8a8375'});
+  if(major) el('text',{x:px(p),y:Y0+19,'font-size':10.5,fill:'#8a8375','text-anchor':'middle'},p+'%');
 }
 
-// ---- 力矩曲线（raised cosine 平滑）----
+// ---- 力矩函数（raised cosine，周期 100）----
 const rc=(t,a,b)=> t<=a?0 : t>=b?1 : (1-Math.cos(Math.PI*(t-a)/(b-a)))/2;
-function torq(t){ const ext=5.5*rc(t,15,25)*(1-rc(t,29,40));
-                  const flex=5.0*rc(t,84,92)*(1-rc(t,92,100)); return [ext,flex]; }
-function pathOf(shift,dash,col){
+function torq(t){ t=((t%100)+100)%100;
+  return [5.5*rc(t,15,25)*(1-rc(t,29,40)), 5.0*rc(t,84,92)*(1-rc(t,92,100))]; }
+function segPath(a,b,col,w,dash,shift){
   let d='';
-  for(let t=0;t<=100;t+=0.25){ const tt=(t+shift)%100; const [e,f]=torq(tt); const v=Math.max(e,f);
-    d+=(t===0?'M':'L')+px(t).toFixed(1)+' '+py(v).toFixed(1)+' ';}
-  el('path',{d,fill:'none',stroke:col,'stroke-width':2.4,'stroke-dasharray':dash});
+  for(let t=a;t<=b+0.001;t+=0.25){ const [e,f]=torq(t+(shift||0)); d+=(d===''?'M':'L')+px(t).toFixed(1)+' '+py(Math.max(e,f)).toFixed(1)+' '; }
+  el('path',{d,fill:'none',stroke:col,'stroke-width':w,'stroke-dasharray':dash||''});
 }
-// 左脚（虚线，右移 50%）
-pathOf(50,'5 4','#c9a9d6');
-// 右脚分段着色：伸段橙、屈段紫、其余深灰
-function segPath(a,b,col,w){let d='';for(let t=a;t<=b;t+=0.25){const [e,f]=torq(t);d+=(t===a?'M':'L')+px(t).toFixed(1)+' '+py(Math.max(e,f)).toFixed(1)+' ';}el('path',{d,fill:'none',stroke:col,'stroke-width':w});}
-segPath(0,15,'#5a564e',2.4); segPath(15,40,'#c2571f',3); segPath(40,84,'#5a564e',2.4); segPath(84,100,'#7a4fa3',3);
+// 左脚（浅色虚线，右移 50%）
+for(let c=0;c<CYC;c++){
+  segPath(c*100,c*100+15,'#b9b2a4',1.8,'4 4',50);
+  segPath(c*100+15,c*100+40,'#e0b48c',2.2,'4 4',50);
+  segPath(c*100+40,c*100+84,'#b9b2a4',1.8,'4 4',50);
+  segPath(c*100+84,c*100+100,'#c9a9d6',2.2,'4 4',50);
+}
+// 右脚（实线，分段着色）
+for(let c=0;c<CYC;c++){
+  segPath(c*100,c*100+15,'#5a564e',2.4);
+  segPath(c*100+15,c*100+40,'#c2571f',3);
+  segPath(c*100+40,c*100+84,'#5a564e',2.4);
+  segPath(c*100+84,c*100+100,'#7a4fa3',3);
+}
 
-// ---- 肌肉激活条（生理示意）----
+// ---- 肌肉激活条（每周期重复）----
 const bars=[
- {n:'臀大肌+腘绳（髋伸）', c:'#c2571f', segs:[[0,12,.30],[15,45,.85]]},
- {n:'髂腰肌+股直（髋屈）', c:'#7a4fa3', segs:[[55,78,.85],[84,98,.30]]},
- {n:'腓肠肌+比目鱼（踝跖屈）', c:'#2e6f9e', segs:[[10,55,.85]]},
- {n:'胫骨前肌（踝背屈）', c:'#3e8e5a', segs:[[62,98,.65],[0,6,.25]]},
+ {n:'臀大肌+腘绳（髋伸）', c:'#c2571f', segs:[[0,12,.28],[15,45,.8]]},
+ {n:'髂腰肌+股直（髋屈）', c:'#7a4fa3', segs:[[55,78,.8],[84,98,.28]]},
+ {n:'腓肠肌+比目鱼（踝跖屈）', c:'#2e6f9e', segs:[[10,55,.8]]},
+ {n:'胫骨前肌（踝背屈）', c:'#3e8e5a', segs:[[62,98,.6],[0,6,.22]]},
 ];
 bars.forEach((b,i)=>{
   const y=MB.y+i*(MB.rowH+MB.gap);
+  if(i===0){
+    el('text',{x:X0-8,y:y-8,'font-size':11.5,fill:'#6b6559'},'肌肉激活（生理示意，每周期重复）');
+    el('text',{x:px(66),y:y-8,'font-size':11,fill:'#7a4fa3','text-anchor':'middle'},'▲ 生理屈肌峰（60–73%）：OpenExo 不在此助力');
+  }
   el('text',{x:X0-8,y:y+16,'font-size':11.5,fill:'#57534a','text-anchor':'end'},b.n);
   el('rect',{x:X0,y:y,width:X1-X0,height:MB.rowH,fill:'#f4f0e8',rx:4});
-  b.segs.forEach(([a,o,al])=>el('rect',{x:px(a),y:y+4,width:px(b)-px(a),height:MB.rowH-8,fill:b.c,opacity:al,rx:4}));
+  for(let c=0;c<CYC;c++) b.segs.forEach(([a,o,al])=>
+    el('rect',{x:px(c*100+a),y:y+4,width:px(b-a),height:MB.rowH-8,fill:b.c,opacity:al,rx:4}));
 });
-el('text',{x:px(66),y:MB.y-6,'font-size':11,fill:'#7a4fa3'},'▲ 生理屈肌峰（60–73%）：OpenExo 不在这里助力');
-el('text',{x:px(84),y:MB.y+MB.rowH+MB.gap-6,'font-size':11,fill:'#a05a1e'},'▲ OpenExo 助力窗（84–100%）：错位就是代价');
+el('text',{x:px(84),y:MB.y+MB.rowH+MB.gap-6,'font-size':11,fill:'#a05a1e','text-anchor':'middle'},'▲ OpenExo 助力窗（每周期 84–100%）');
 
 // ---- 关键竖线 ----
-[[0,'0% 跟击 R','#57534a'],[50,'50% 跟击 L','#57534a'],[60,'60% toe-off R','#57534a'],
- [84,'84% 屈助力出发','#7a4fa3'],[92,'92% 屈峰','#7a4fa3'],[100,'100% 跟击 R = 0%','#57534a']].forEach(([p,t,c])=>{
-  el('line',{x1:px(p),y1:30,x2:px(p),y2:MB.y+MB.rowH*4+MB.gap*3,stroke:c,'stroke-width':p===84||p===92?1.4:1,'stroke-dasharray':'3 3',opacity:.75});
-  el('text',{x:px(p)+(p===0?4:0)+(p===100?-4:0),y:24,'font-size':11,fill:c,'text-anchor':p===0?'start':p===100?'end':'middle'},t);
+for(let c=0;c<=CYC;c++){
+  el('line',{x1:px(c*100),y1:30,x2:px(c*100),y2:BG_BOT-16,stroke:'#57534a','stroke-width':1.2,'stroke-dasharray':'5 3',opacity:.8});
+  el('text',{x:px(c*100)+(c===CYC?-4:4),y:44,'font-size':11,fill:'#57534a','text-anchor':c===CYC?'end':'start'},'跟击 R');
+}
+[50,150,250].forEach(p=>{
+  el('line',{x1:px(p),y1:30,x2:px(p),y2:BG_BOT-16,stroke:'#8a8375','stroke-width':1,'stroke-dasharray':'2 4',opacity:.7});
+  el('text',{x:px(p),y:44,'font-size':11,fill:'#8a8375','text-anchor':'middle'},'跟击 L');
 });
+[84,92].forEach((p,i)=>{
+  for(let c=0;c<CYC;c++) el('line',{x1:px(c*100+p),y1:Y0,x2:px(c*100+p),y2:Y0-14,stroke:'#7a4fa3','stroke-width':1,'stroke-dasharray':'2 3',opacity:.7});
+  el('text',{x:px(p),y:Y0-20,'font-size':10.5,fill:'#7a4fa3','text-anchor':'middle'},i===0?'84% 出发':'92% 峰');
+});
+for(let c=0;c<CYC;c++){
+  el('text',{x:px(c*100+60),y:Y0-6,'font-size':10.5,fill:'#57534a','text-anchor':'middle'},'60% toe-off');
+}
 
 // ---- hover 交互 ----
 const tip=document.getElementById('tip'), wrap=document.getElementById('wrap');
@@ -177,23 +200,24 @@ const phases=[
  {a:10,b:15,t:'承重过渡',body:'身体滚到右脚上方',mus:'—',exo:'0（伸助力即将出发）'},
  {a:15,b:40,t:'蹬伸 · 伸助力段',body:'蹬直腿把身体向前推',mus:'臀大肌/腘绳肌向心',exo:'伸峰 ~5.5 Nm（≈10% 助力）'},
  {a:40,b:60,t:'蹬离',body:'脚跟抬起→脚趾离地',mus:'腓肠肌+比目鱼向心（踝的账）',exo:'0 —— 踝外骨骼主场'},
- {a:60,b:84,t:'摆动前中',body:'右腿腾空自己往前摆',mus:'髂腰肌/股直肌（生理屈肌峰在此，OpenExo 不助力）',exo:'0'},
+ {a:60,b:84,t:'摆动前中',body:'右腿腾空自己往前摆',mus:'髂腰肌/股直肌（生理屈肌峰在此）',exo:'0'},
  {a:84,b:92,t:'摆动末 · 屈助力爬升',body:'腿摆到身前收拢',mus:'髋屈肌收尾',exo:'屈助力爬升（84% 出发）'},
- {a:92,b:100,t:'准备落地 · 归零',body:'减速，准备跟击',mus:'髋伸肌预备刹车',exo:'屈峰→100% 归零（跟击前必须结清）'}
+ {a:92,b:100,t:'准备落地 · 归零',body:'减速，准备跟击',mus:'髋伸肌预备刹车',exo:'屈峰→100% 归零'}
 ];
 let guide=null;
 svg.addEventListener('mousemove',e=>{
   const r=svg.getBoundingClientRect();
   const sx=(e.clientX-r.left)/r.width*1000;
-  const p=Math.min(100,Math.max(0,(sx-X0)/(X1-X0)*100));
-  if(!guide){guide=el('line',{x1:px(p),y1:30,x2:px(p),y2:MB.y+MB.rowH*4+MB.gap*3,stroke:'#2b2a27','stroke-width':1,opacity:.5});}
-  guide.setAttribute('x1',px(p));guide.setAttribute('x2',px(p));
+  const g=Math.min(TOT,Math.max(0,(sx-X0)/(X1-X0)*TOT));
+  if(!guide){guide=el('line',{x1:px(g),y1:30,x2:px(g),y2:BG_BOT-16,stroke:'#2b2a27','stroke-width':1,opacity:.45});}
+  guide.setAttribute('x1',px(g));guide.setAttribute('x2',px(g));
+  const p=g%100, cyc=Math.floor(g/100)+1;
   const ph=phases.find(q=>p>=q.a&&p<q.b)||phases[6];
-  const [eR,fR]=torq(p), [eL,fL]=torq((p+50)%100);
-  tip.innerHTML=`<b>右脚相位 ${p.toFixed(0)}%</b> · ${ph.t}<br>身体：${ph.body}<br>肌肉：${ph.mus}<br>右脚髋助力：${(Math.max(eR,fR)).toFixed(1)} Nm（${ph.exo}）<br>左脚此刻：${(Math.max(eL,fL)).toFixed(1)} Nm（左脚相位 ${((p+50)%100).toFixed(0)}%）`;
+  const [eR,fR]=torq(p), [eL,fL]=torq(p+50);
+  tip.innerHTML=`<b>第 ${cyc} 周期 · 周期内 ${p.toFixed(0)}%</b> · ${ph.t}<br>身体：${ph.body}<br>肌肉：${ph.mus}<br>右脚助力 ${Math.max(eR,fR).toFixed(1)} Nm ｜ 左脚（相位 ${((p+50)%100).toFixed(0)}%）${Math.max(eL,fL).toFixed(1)} Nm`;
   tip.style.display='block';
   const wr=wrap.getBoundingClientRect();
-  let lx=e.clientX-wr.left+14; if(lx+300>wr.width) lx-=314;
+  let lx=e.clientX-wr.left+14; if(lx+310>wr.width) lx-=324;
   tip.style.left=lx+'px'; tip.style.top=(e.clientY-wr.top+12)+'px';
 });
 svg.addEventListener('mouseleave',()=>{tip.style.display='none'; if(guide){guide.remove();guide=null;}});
