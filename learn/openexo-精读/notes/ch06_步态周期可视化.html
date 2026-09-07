@@ -78,6 +78,14 @@
         <td><b>屈助力：84% 出发 → ~92% 峰 → 100% 归零</b>（跟击前必须结清）</td></tr>
   </table>
 
+  <h2>无外骨骼时的步态参考：关节角度 × 肌肉发力</h2>
+  <div id="gwrap"><svg id="gait" viewBox="0 0 1200 380" style="display:block;width:100%"></svg></div>
+  <div class="note">两条角度曲线为<b>AI 生理示意</b>（正常行走常识近似，精确角度-相位关系待对 Perry &amp; Burnfield 图谱）。<b>彩色段 = 对应肌肉正在发力</b>（深 = 强/向心，浅 = 弱/离心或收尾）——橙色段角度被推向「伸」（下降），紫色段被拉向「屈」（上升）。</div>
+
+  <h2>步态小人（自动播放 · 鼠标移入任意图表可逐相查看）</h2>
+  <div id="wwrap"><svg id="walker" viewBox="0 0 1200 310" style="display:block;width:100%"></svg></div>
+  <div class="note">小人按当前相位的髋/膝/踝角度摆姿势（<b>AI 示意</b>）；<b>红色圆点 + 右栏红字 = 此刻发力的肌肉</b>（强度前二）。左腿浅灰为对照（相位 +50%）。与任意图表 hover 联动，移出恢复自动播放。</div>
+
   <h2>两本肌肉账本，别混</h2>
   <div class="cards">
     <div class="card"><h3>髋账本（本页主角）</h3>
@@ -104,7 +112,7 @@ const X0=160, X1=1168, Y0=330, YT=54, VMAX=6, CYC=3, TOT=CYC*100;
 const MB={y:392, rowH:27, gap:9};
 const NS='http://www.w3.org/2000/svg';
 const svg=document.getElementById('fig');
-function el(n,a,txt){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;}
+function el(n,a,txt,parent){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;(parent||svg).appendChild(e);return e;}
 const px=p=>X0+(X1-X0)*p/TOT;
 const py=v=>Y0-(Y0-YT)*v/VMAX;
 const BG_BOT=MB.y+MB.rowH*4+MB.gap*3+18;
@@ -213,6 +221,7 @@ svg.addEventListener('mousemove',e=>{
   const g=Math.min(TOT,Math.max(0,(sx-X0)/(X1-X0)*TOT));
   if(!guide){guide=el('line',{x1:px(g),y1:30,x2:px(g),y2:BG_BOT-18,stroke:'#2b2a27','stroke-width':1,opacity:.45});}
   guide.setAttribute('x1',px(g));guide.setAttribute('x2',px(g));
+  if(window._gSet) window._gSet(g);
   const p=g%100, cyc=Math.floor(g/100)+1;
   const ph=phases.find(q=>p>=q.a&&p<q.b)||phases[6];
   const [eR,fR]=torq(p), [eL,fL]=torq(p+50);
@@ -222,7 +231,133 @@ svg.addEventListener('mousemove',e=>{
   let lx=e.clientX-wr.left+14; if(lx+310>wr.width) lx-=324;
   tip.style.left=lx+'px'; tip.style.top=(e.clientY-wr.top+12)+'px';
 });
-svg.addEventListener('mouseleave',()=>{tip.style.display='none'; if(guide){guide.remove();guide=null;}});
+svg.addEventListener('mouseleave',()=>{tip.style.display='none'; if(guide){guide.remove();guide=null;} if(window._gRelease) window._gRelease();});
+</script>
+<script>
+// ================= 无外骨骼步态参考：关节角度 × 肌肉发力 =================
+const gsvg=document.getElementById('gait');
+function gel(n,a,txt){return el(n,a,txt,gsvg);}
+function interp(kf,p){ p=((p%100)+100)%100;
+  for(let i=0;i<kf.length-1;i++){ const [a,va]=kf[i],[b,vb]=kf[i+1];
+    if(p>=a&&p<=b){const u=rc(p,a,b===a?a+0.001:b);return va+(vb-va)*u;} }
+  return kf[kf.length-1][1];}
+const HIP=[[0,30],[10,24],[15,15],[30,-5],[45,-10],[50,-12],[60,-10],[66,5],[73,18],[80,29],[85,32],[92,32],[100,30]];
+const ANK=[[0,-3],[8,-6],[20,-2],[30,5],[40,9],[48,8],[55,0],[60,-12],[65,-19],[70,-14],[78,0],[85,2],[95,1],[100,0]];
+const KNEE=[[0,6],[10,14],[20,10],[30,6],[40,4],[50,6],[55,9],[60,15],[66,38],[73,58],[80,65],[85,50],[92,25],[100,6]];
+window._hip=p=>interp(HIP,p); window._ank=p=>interp(ANK,p); window._knee=p=>interp(KNEE,p);
+const HZ={zero:128,s:2.15};
+const AZ={zero:288,s:1.87};
+gel('text',{x:X0-46,y:30,'font-size':12,fill:'#6b6559','font-weight':600},'无外骨骼步态参考（AI 生理示意，待对 Perry 图谱）');
+gel('text',{x:X1,y:30,'font-size':11.5,fill:'#6b6559','text-anchor':'end'},'曲线彩色段 = 该肌肉正在发力（深 = 强/向心，浅 = 弱/离心或收尾）');
+for(let c=0;c<CYC;c++) gel('rect',{x:px(c*100),y:44,width:px(60),height:330-44,fill:c%2?'#faf8f3':'#f4f3ec'});
+gel('text',{x:X0-46,y:64,'font-size':12,fill:'#c2571f','font-weight':600},'髋关节角度（° 屈+ / 伸−）');
+gel('line',{x1:X0,y1:HZ.zero,x2:X1,y2:HZ.zero,stroke:'#b9b2a4','stroke-width':1,'stroke-dasharray':'4 3'});
+gel('text',{x:X0-10,y:HZ.zero+4,'font-size':10.5,fill:'#8a8375','text-anchor':'end'},'0°');
+gel('text',{x:X0-10,y:HZ.zero-30*HZ.s+4,'font-size':10.5,fill:'#8a8375','text-anchor':'end'},'+30°');
+gel('text',{x:X0-10,y:HZ.zero+15*HZ.s+4,'font-size':10.5,fill:'#8a8375','text-anchor':'end'},'−15°');
+gel('text',{x:X0-46,y:224,'font-size':12,fill:'#2e6f9e','font-weight':600},'踝关节角度（° 背屈+ / 跖屈−）');
+gel('line',{x1:X0,y1:AZ.zero,x2:X1,y2:AZ.zero,stroke:'#b9b2a4','stroke-width':1,'stroke-dasharray':'4 3'});
+gel('text',{x:X0-10,y:AZ.zero+4,'font-size':10.5,fill:'#8a8375','text-anchor':'end'},'0°');
+gel('text',{x:X0-10,y:AZ.zero+20*AZ.s+4,'font-size':10.5,fill:'#8a8375','text-anchor':'end'},'−20°');
+gel('line',{x1:X0,y1:346,x2:X1,y2:346,stroke:'#8a8375','stroke-width':1});
+for(let p=0;p<=TOT;p+=50){const anch=p===0?'start':p===TOT?'end':'middle';const dx=p===0?2:p===TOT?-2:0;
+  gel('text',{x:px(p)+dx,y:364,'font-size':11.5,fill:'#8a8375','text-anchor':anch},p+'%');}
+const hipSegs=[[15,45,'#c2571f',.95],[60,78,'#7a4fa3',.95],[84,98,'#c9a9d6',.85]];
+const ankSegs=[[10,45,'#7aa8c9',.8],[45,65,'#2e6f9e',.95],[62,90,'#3e8e5a',.9],[0,6,'#a8cfb7',.8]];
+function angPath(kf,zs,a,b,col,w){let d='';
+  for(let t=a;t<=b+0.001;t+=0.25){const th=interp(kf,t%100);d+=(d===''?'M':'L')+px(t).toFixed(1)+' '+(zs.zero-th*zs.s).toFixed(1)+' ';}
+  gel('path',{d,fill:'none',stroke:col,'stroke-width':w});}
+angPath(HIP,HZ,0,TOT,'#5a564e',1.6);
+angPath(ANK,AZ,0,TOT,'#5a564e',1.6);
+for(let c=0;c<CYC;c++){
+  hipSegs.forEach(([a,z,col,w])=>angPath(HIP,HZ,c*100+a,c*100+z,col,2.8));
+  ankSegs.forEach(([a,z,col,w])=>angPath(ANK,AZ,c*100+a,c*100+z,col,2.8));}
+[[30,'伸肌发力：角度被推向伸','#c2571f',170],[70,'屈肌峰发力：最陡上升','#7a4fa3',166],[25,'跟腱弹簧拉长储能','#7aa8c9',AZ.zero+34],[55,'爆发跖屈蹬地','#2e6f9e',AZ.zero-52],[82,'勾脚防拖地','#3e8e5a',AZ.zero-42]].forEach(([p,t,c,y])=>
+  gel('text',{x:px(p),y:y,'font-size':11,fill:c,'text-anchor':'middle'},t));
+for(let c=0;c<=CYC;c++) gel('line',{x1:px(c*100),y1:44,x2:px(c*100),y2:346,stroke:'#57534a','stroke-width':1,'stroke-dasharray':'5 3',opacity:.55});
+[[84,'#7a4fa3'],[92,'#7a4fa3'],[60,'#57534a']].forEach(([p,c])=>gel('line',{x1:px(p),y1:44,x2:px(p),y2:346,stroke:c,'stroke-width':1,'stroke-dasharray':'2 3',opacity:.5}));
+const gGuide=gel('line',{x1:X0,y1:44,x2:X0,y2:346,stroke:'#2b2a27','stroke-width':1,opacity:.45,visibility:'hidden'});
+gsvg.addEventListener('mousemove',e=>{const r=gsvg.getBoundingClientRect();
+  const sx=(e.clientX-r.left)/r.width*1200; const g=Math.min(TOT,Math.max(0,(sx-X0)/(X1-X0)*TOT));
+  gGuide.setAttribute('visibility','visible'); gGuide.setAttribute('x1',px(g)); gGuide.setAttribute('x2',px(g));
+  if(window._gSet)window._gSet(g);});
+gsvg.addEventListener('mouseleave',()=>{gGuide.setAttribute('visibility','hidden'); if(window._gRelease)window._gRelease();});
+</script>
+<script>
+// ================= 步态小人：参数化姿态 + 发力红标 + 播放/联动 =================
+const wsvg=document.getElementById('walker');
+function wel(n,a,txt){return el(n,a,txt,wsvg);}
+const HIPY=110, L1=72, L2=66, FOOT=24, GY=HIPY+130, BODY=80, HEADR=13;
+const CX=240;
+function legGeom(p){
+  const h=interp(HIP,p)*Math.PI/180, k=interp(KNEE,p)*Math.PI/180, a=interp(ANK,p);
+  const hx=CX, hy=HIPY;
+  const kx=hx+L1*Math.sin(h), ky=hy+L1*Math.cos(h);
+  const ax=kx+L2*Math.sin(h-k), ay=ky+L2*Math.cos(h-k);
+  const fx=ax+FOOT*Math.cos(a*Math.PI/360), fy=ay+FOOT*Math.abs(Math.sin(a*Math.PI/360))+3+(a<0?(-a)*0.12:0);
+  return {hx,hy,kx,ky,ax,ay,fx,fy,h,k,a};}
+function drawLeg(g,col,w){
+  wel('line',{x1:g.hx,y1:g.hy,x2:g.kx,y2:g.ky,stroke:col,'stroke-width':w,'stroke-linecap':'round'});
+  wel('line',{x1:g.kx,y1:g.ky,x2:g.ax,y2:g.ay,stroke:col,'stroke-width':w,'stroke-linecap':'round'});
+  wel('line',{x1:g.ax,y1:g.ay,x2:g.fx,y2:g.fy,stroke:col,'stroke-width':w+1,'stroke-linecap':'round'});}
+function strength(p){ // 四块肌肉当前强度 0..1
+  return bars.map(b=>{let s=0; b.segs.forEach(([a,z,al])=>{ s=Math.max(s, al*rc(p,a,Math.min(z,a+4))*(1-rc(p,Math.max(a,z-4),z))); }); return s;});}
+const MUSCLE_POS=[ // 肌腹标记点（相对腿几何）：比例插值 + 法向偏移
+ {name:'臀大肌+腘绳（髋伸）', t:0.5, side:-14, seg:'thigh'},
+ {name:'髂腰肌+股直（髋屈）', t:0.32, side:14, seg:'thigh'},
+ {name:'腓肠肌+比目鱼（踝跖屈）', t:0.25, side:-13, seg:'shank'},
+ {name:'胫骨前肌（踝背屈）', t:0.3, side:13, seg:'shank'}];
+let gPhase=0, playing=true, lastT=null;
+function drawWalker(){
+  wsvg.innerHTML='';
+  const p=gPhase%100, cyc=Math.floor(gPhase/100)+1;
+  wel('text',{x:40,y:46,'font-size':20,fill:'#2b2a27','font-weight':700},'第 '+cyc+' 周期 · '+p.toFixed(0)+'%');
+  wel('line',{x1:100,y1:GY,x2:520,y2:GY,stroke:'#8a8375','stroke-width':1.5});
+  wel('text',{x:100,y:GY+20,'font-size':11,fill:'#8a8375'},'地面');
+  // 左腿（浅灰，相位+50）与右腿
+  drawLeg(legGeom((p+50)%100),'#cfc9bd',3.5);
+  const g=legGeom(p);
+  // 躯干+头
+  wel('line',{x1:CX,y1:HIPY,x2:CX-7,y2:HIPY-BODY,stroke:'#2b2a27','stroke-width':5,'stroke-linecap':'round'});
+  wel('circle',{cx:CX-9,cy:HIPY-BODY-16,r:HEADR,fill:'#faf7f2',stroke:'#2b2a27','stroke-width':3});
+  drawLeg(g,'#57534e',4.5);
+  // 发力前二：红标肌腹
+  const st=strength(p);
+  const order=[0,1,2,3].sort((i,j)=>st[j]-st[i]);
+  order.slice(0,2).forEach(idx=>{
+    const m=MUSCLE_POS[idx];
+    let px0,py0,nx,ny;
+    if(m.seg==='thigh'){px0=g.hx+(g.kx-g.hx)*m.t; py0=g.hy+(g.ky-g.hy)*m.t;
+      const dx=g.kx-g.hx,dy=g.ky-g.hy,L=Math.hypot(dx,dy);nx=-dy/L*m.side;ny=dx/L*m.side;}
+    else {px0=g.kx+(g.ax-g.kx)*m.t; py0=g.ky+(g.ay-g.ky)*m.t;
+      const dx=g.ax-g.kx,dy=g.ay-g.ky,L=Math.hypot(dx,dy);nx=-dy/L*m.side;ny=dx/L*m.side;}
+    const mx=px0+nx,my=py0+ny;
+    wel('line',{x1:px0,y1:py0,x2:mx,y2:my,stroke:'#c0392b','stroke-width':1.2});
+    wel('circle',{cx:mx,cy:my,r:5,fill:'#e74c3c',stroke:'#fff','stroke-width':1.5});
+    wel('text',{x:mx+9,y:my+4,'font-size':11.5,fill:'#c0392b','font-weight':600},m.name.split('（')[0]);
+  });
+  // 右栏：四块肌肉强度条
+  const RX=560;
+  wel('text',{x:RX,y:40,'font-size':13,fill:'#2b2a27','font-weight':700},'此刻发力强度（右腿）');
+  wel('text',{x:RX,y:62,'font-size':11,fill:'#8a8375'},'红 = 强度前二（图上已标红点）');
+  bars.forEach((b,i)=>{
+    const y=84+i*44;
+    wel('text',{x:RX,y:y+14,'font-size':12,fill:order.slice(0,2).includes(i)?'#c0392b':'#57534a','font-weight':order.slice(0,2).includes(i)?700:400},b.n);
+    wel('rect',{x:RX+250,y:y+2,width:200,height:12,fill:'#f4f0e8',rx:3});
+    if(st[i]>0.01) wel('rect',{x:RX+250,y:y+2,width:200*Math.min(1,st[i]),height:12,fill:b.c,opacity:.85,rx:3});
+  });
+  wel('text',{x:RX,y:280,'font-size':11,fill:'#8a8375'},'自动播放中 · 鼠标移入任意图表可逐相查看，移出恢复');
+}
+window._gSet=g=>{playing=false;gPhase=g;drawWalker();};
+window._gRelease=()=>{playing=true;lastT=null;};
+function loop(t){ if(playing){ if(lastT!=null){gPhase=(gPhase+(t-lastT)*0.0165)%300;} lastT=t; drawWalker();}
+  else lastT=null; requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+// 自检钩子：抽样脚部 y 与关节连续性
+window._gaitCheck=function(){
+  const out=[];
+  for(let p=0;p<100;p+=5){const g=legGeom(p);out.push({p,fy:+g.fy.toFixed(1),ay:+g.ay.toFixed(1)});}
+  return out;};
 </script>
 </body>
 </html>
