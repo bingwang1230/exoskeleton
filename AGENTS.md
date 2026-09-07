@@ -50,9 +50,9 @@
 6. **计划是参考非承诺**：用户提前完成本周事项时，不必等周日复盘——当场按阶段判据门与任务看板给出后续任务候选，用户确认后上板（决策记录 2026-08-30 七）。
 7. **素材伴随**：建议任何工程/实践类任务时，同步给出素材点（何时录屏/拍摄/截图，见三线计划 §4.2）；命中素材库判据的当场登记进 `content/INDEX.md` 待拍区（自动记录纪律见 §10）。
 
-## 6. 定时提醒协议（每日项目经理，2026-08-30 v2；2026-09-05 v3：先总结后建议）
+## 6. 定时提醒协议（每日项目经理，2026-08-30 v2；2026-09-05 v3：先总结后建议；2026-09-07 v4：单触发，兜底层移除）
 
-**触发**：launchd `local.exoskeleton-daily-pm` 每日 08:00 主触发；pi-subagents schedule `daily-pm`（every 1d，锚定 08:00）作补发兑底（晚于 08:00 才打开本项目 pi 会话时补发）。幂等：`.pi/daily-pm/stamp` 为今日则跳过；两个触发源去重。逻辑实现在 `scripts/daily-pm.sh`，测试：`DAILY_PM_FORCE=1 bash scripts/daily-pm.sh`。
+**触发**：launchd `local.exoskeleton-daily-pm` 每日 08:00，**唯一触发源**（2026-09-07 第十九决策移除 pi-subagents schedule 补发兜底：其宿主 pi 无后台子会话能力，失败通知会注入打开中的会话；launchd 对睡眠错过的时点唤醒时补跑，脚本失败不写 stamp，可手动 `bash scripts/daily-pm.sh` 补发）。幂等：`.pi/daily-pm/stamp` 为今日则跳过。逻辑实现在 `scripts/daily-pm.sh`，测试：`DAILY_PM_FORCE=1 bash scripts/daily-pm.sh`。
 
 **交付（2026-08-30 v2：未读会话即提醒）**：每次触发用 `pi --no-extensions -n <名称> -p <用户口吻的开场白>` 创建一条命名会话——**未读会话就是提醒本体**，Bark 推送只是手机端入口提示。用户进入回复后，该会话即转为常态会话：按 §5/落账规则当场处理（确认完成、改期、容量反馈均可落账）。行为规范：
 

@@ -1,10 +1,9 @@
 #!/bin/bash
 # 外骨骼计划 · 每日项目经理提醒（v5：先总结后建议，决策十八；v4：周日双会话）
-# 主触发：launchd local.exoskeleton-daily-pm（每日 08:00）
-# 兜底：pi-subagents schedule "daily-pm"（every 1d，锚定 08:00；晚于 08:00 打开本项目 pi 会话时补发）
+# 主触发：launchd local.exoskeleton-daily-pm（每日 08:00）—— 唯一触发源（2026-09-07 第十九决策移除 pi-subagents 兜底 schedule）
 # 交付：每天一条「每日提醒 · 日期」命名会话（先总结昨天、再建议今天）；周日额外一条「周复盘 · 日期」（先总结本周、再起草下周）。
 #        未读会话即提醒；用户进入回复后该会话转常态会话（可落账）；Bark 推送作手机端入口。
-# 失败语义：每日提醒本体失败 → 不写 stamp、exit 1（当天打开项目会话时兜底层可补发）；
+# 失败语义：每日提醒本体失败 → 不写 stamp、exit 1（当天可手动 bash scripts/daily-pm.sh 补发；launchd 对睡眠错过的时点唤醒时补跑）；
 #           仅周复盘失败 → 写 stamp（防每日提醒重复推），exit 1，详见日志。
 # 幂等：stamp=今日则跳过；DAILY_PM_FORCE=1 强制跑（标题加「测试」前缀，不写 stamp）
 set -uo pipefail
@@ -112,8 +111,8 @@ if [ "$RC" = "0" ]; then
   exit 0
 fi
 if ! grep -q "^session: 每日提醒" "$LAST" 2>/dev/null; then
-  # 每日提醒本体失败：不写 stamp（当天可由兜底层补发），推失败通知
-  push_bark "外骨骼今日建议 · $TODAY" "今日提醒生成失败（详见 .pi/logs/daily-pm.err）。今天内打开本项目任意 pi 会话会自动补发。" || true
+  # 每日提醒本体失败：不写 stamp（当天可手动补发），推失败通知
+  push_bark "外骨骼今日建议 · $TODAY" "今日提醒生成失败（详见 .pi/logs/daily-pm.err）。可手动补发：bash scripts/daily-pm.sh" || true
   exit 1
 fi
 # 每日提醒成功、周复盘失败：写 stamp 防重复，失败详情在日志
