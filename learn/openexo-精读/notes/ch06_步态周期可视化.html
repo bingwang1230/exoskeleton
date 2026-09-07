@@ -172,9 +172,9 @@ el('text',{x:X1,y:MB.y-22,'font-size':11.5,fill:'#a05a1e','text-anchor':'end'},'
 bars.forEach((b,i)=>{
   const y=MB.y+i*(MB.rowH+MB.gap);
   el('text',{x:X0-12,y:y+17,'font-size':11.5,fill:'#57534a','text-anchor':'end'},b.n);
-  el('rect',{x:X0,y:y,width:X1-X0,height:MB.rowH,fill:'#f4f0e8',rx:4});
-  for(let c=0;c<CYC;c++) b.segs.forEach(([a,o,al])=>
-    el('rect',{x:px(c*100+a),y:y+4,width:px(b-a),height:MB.rowH-8,fill:b.c,opacity:al,rx:4}));
+  el('rect',{x:X0,y:y,width:X1-X0,height:MB.rowH,fill:'#fdfbf7',stroke:'#d8d2c6','stroke-width':1,rx:4});
+  for(let c=0;c<CYC;c++) b.segs.forEach(([a,z,al])=>
+    el('rect',{x:px(c*100+a),y:y+4,width:px(z)-px(a),height:MB.rowH-8,fill:b.c,opacity:Math.min(1,al+0.12),stroke:b.c,'stroke-width':1,rx:4}));
 });
 
 // ---- 事件竖线与标注（分层：跟击行 y=22，事件行 y=46，避免互撞）----
