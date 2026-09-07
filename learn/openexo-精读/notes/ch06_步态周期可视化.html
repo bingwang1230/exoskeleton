@@ -9,7 +9,7 @@
   *{box-sizing:border-box}
   body{margin:0;padding:32px 20px 60px;background:var(--paper);color:var(--ink);
        font:15px/1.7 "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
-  .page{max-width:1060px;margin:0 auto}
+  .page{max-width:1160px;margin:0 auto}
   h1{font-size:22px;margin:0 0 4px}
   .sub{color:#6b6559;font-size:13.5px;margin-bottom:18px}
   .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:#57534a;margin-bottom:10px}
@@ -46,7 +46,7 @@
   </div>
 
   <div id="wrap">
-    <svg id="fig" viewBox="0 0 1000 560" style="display:block;width:100%"></svg>
+    <svg id="fig" viewBox="0 0 1200 590" style="display:block;width:100%"></svg>
     <div id="tip"></div>
   </div>
   <div class="note">图上移动鼠标：竖线跟随，显示<b>第几个周期、周期内相位</b>、两脚各自助力与身体状态。⚠️ 曲线为<b>教学示意</b>：论文忠实项 = 84% 出发 / ~92% 峰 / 100% 归零 / 峰值 5.0 与 5.5 Nm / 升降时间用户可调；<b>峰位置与升降时长取示意值</b>（精确时序 = Franks 跨被试均值，材料未给数值，待查开源代码）。肌肉条为生理激活示意，按周期重复。</div>
@@ -91,7 +91,7 @@
   <div class="note">量级对账：你记的「30%」是<b>踝</b>的账（28 Nm ≈ 生理踝峰 ~100+ Nm 的 25–30%，代谢收益主场）；髋只有 <b>~10%</b>——搭把手定位。生理峰值为 AI 补常识，待确认。</div>
 
   <h2>84–100% 窗口的生理代价（诚实标注）</h2>
-  <div class="note">生理髋屈肌峰发力在 <b>initial swing（60–73%）</b>；OpenExo 把屈助力压到摆动<b>末段</b>（84–100%）——不帮「启动摆动」、只帮「收尾摆到位」，这是「起点移 84% 避免跟击不连续」的直接代价。图中紫色肌肉条与紫色助力曲线的错位即此事。原方案（Bryan/Franks）曲线待查原文。</div>
+  <div class="note">生理髋屈肌峰发力在 <b>initial swing（60–73%）</b>；OpenExo 把屈助力压到摆动<b>末段</b>（84–100%）——不帮「启动摆动」、只帮「收尾摆到位」，这是「起点移 84% 避免跟击不连续」的直接代价。图中紫色肌肉条（深段 60–73%）与紫色助力曲线（84–100%）的错位即此事。原方案（Bryan/Franks）曲线待查原文。</div>
 
   <details>
     <summary>检验题：左脚的屈峰，出现在右脚周期的哪个 % 附近？</summary>
@@ -100,36 +100,39 @@
 </div>
 
 <script>
-const X0=62, X1=958, Y0=300, YT=44, VMAX=6, CYC=3, TOT=CYC*100;
-const MB={y:336, rowH:26, gap:7};
+const X0=160, X1=1168, Y0=330, YT=54, VMAX=6, CYC=3, TOT=CYC*100;
+const MB={y:392, rowH:27, gap:9};
 const NS='http://www.w3.org/2000/svg';
 const svg=document.getElementById('fig');
 function el(n,a,txt){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;}
 const px=p=>X0+(X1-X0)*p/TOT;
 const py=v=>Y0-(Y0-YT)*v/VMAX;
-const BG_BOT=MB.y+MB.rowH*4+MB.gap*3+16;
+const BG_BOT=MB.y+MB.rowH*4+MB.gap*3+18;
 
 // ---- 背景分段（每周期重复）----
 for(let c=0;c<CYC;c++){
   el('rect',{x:px(c*100),y:30,width:px(c*100+60)-px(c*100),height:BG_BOT-30,fill:'#eef3f8'});
   el('rect',{x:px(c*100+60),y:30,width:px(c*100+100)-px(c*100+60),height:BG_BOT-30,fill:'#eef6ee'});
   el('rect',{x:px(c*100),y:30,width:px(c*100+10)-px(c*100),height:BG_BOT-30,fill:'#f7edd2'});
-  if(c===0){
-    el('text',{x:px(32),y:BG_BOT-2,'font-size':11,fill:'#7d93a8','text-anchor':'middle'},'支撑相 stance 0–60%');
-    el('text',{x:px(80),y:BG_BOT-2,'font-size':11,fill:'#6f9573','text-anchor':'middle'},'摆动相 swing');
-    el('text',{x:px(5),y:BG_BOT-2,'font-size':11,fill:'#8a8375','text-anchor':'middle'},'吸收');
+  if(c===1){ // 文字只放中周期，避免边界拥挤
+    el('text',{x:px(132),y:BG_BOT-3,'font-size':11.5,fill:'#7d93a8','text-anchor':'middle'},'支撑相 stance 0–60%');
+    el('text',{x:px(180),y:BG_BOT-3,'font-size':11.5,fill:'#6f9573','text-anchor':'middle'},'摆动相 swing 60–100%');
   }
 }
 
 // ---- 坐标轴 ----
 el('line',{x1:X0,y1:Y0,x2:X1,y2:Y0,stroke:'#8a8375','stroke-width':1});
 el('line',{x1:X0,y1:30,x2:X0,y2:Y0,stroke:'#8a8375','stroke-width':1});
-for(let v=0;v<=6;v+=2) el('text',{x:X0-8,y:py(v)+4,'font-size':11,fill:'#8a8375','text-anchor':'end'},v);
-el('text',{x:X0+4,y:YT-14,'font-size':11.5,fill:'#6b6559'},'τ (Nm)');
+for(let v=0;v<=6;v+=2) el('text',{x:X0-10,y:py(v)+4,'font-size':11.5,fill:'#8a8375','text-anchor':'end'},v);
+el('text',{x:X0-46,y:YT-6,'font-size':12,fill:'#6b6559','text-anchor':'start'},'τ (Nm)');
 for(let p=0;p<=TOT;p+=25){
   const major=p%50===0;
-  el('line',{x1:px(p),y1:Y0,x2:px(p),y2:Y0+(major?5:3),stroke:'#8a8375'});
-  if(major) el('text',{x:px(p),y:Y0+19,'font-size':10.5,fill:'#8a8375','text-anchor':'middle'},p+'%');
+  el('line',{x1:px(p),y1:Y0,x2:px(p),y2:Y0+(major?6:3),stroke:'#8a8375'});
+  if(major){
+    const anch = p===0?'start' : p===TOT?'end' : 'middle';
+    const dx = p===0?2 : p===TOT?-2 : 0;
+    el('text',{x:px(p)+dx,y:Y0+22,'font-size':11.5,fill:'#8a8375','text-anchor':anch},p+'%');
+  }
 }
 
 // ---- 力矩函数（raised cosine，周期 100）----
@@ -163,35 +166,34 @@ const bars=[
  {n:'腓肠肌+比目鱼（踝跖屈）', c:'#2e6f9e', segs:[[10,55,.8]]},
  {n:'胫骨前肌（踝背屈）', c:'#3e8e5a', segs:[[62,98,.6],[0,6,.22]]},
 ];
+// 标题行（独立一行，不与任何条目文字重叠）
+el('text',{x:X0,y:MB.y-22,'font-size':12,fill:'#6b6559','text-anchor':'start'},'肌肉激活（生理示意，每周期重复）');
+el('text',{x:X1,y:MB.y-22,'font-size':11.5,fill:'#a05a1e','text-anchor':'end'},'紫条深段 = 生理屈肌峰 60–73% ↔ OpenExo 助力窗 84–100%（错位 = 代价）');
 bars.forEach((b,i)=>{
   const y=MB.y+i*(MB.rowH+MB.gap);
-  if(i===0){
-    el('text',{x:X0-8,y:y-8,'font-size':11.5,fill:'#6b6559'},'肌肉激活（生理示意，每周期重复）');
-    el('text',{x:px(66),y:y-8,'font-size':11,fill:'#7a4fa3','text-anchor':'middle'},'▲ 生理屈肌峰（60–73%）：OpenExo 不在此助力');
-  }
-  el('text',{x:X0-8,y:y+16,'font-size':11.5,fill:'#57534a','text-anchor':'end'},b.n);
+  el('text',{x:X0-12,y:y+17,'font-size':11.5,fill:'#57534a','text-anchor':'end'},b.n);
   el('rect',{x:X0,y:y,width:X1-X0,height:MB.rowH,fill:'#f4f0e8',rx:4});
   for(let c=0;c<CYC;c++) b.segs.forEach(([a,o,al])=>
     el('rect',{x:px(c*100+a),y:y+4,width:px(b-a),height:MB.rowH-8,fill:b.c,opacity:al,rx:4}));
 });
-el('text',{x:px(84),y:MB.y+MB.rowH+MB.gap-6,'font-size':11,fill:'#a05a1e','text-anchor':'middle'},'▲ OpenExo 助力窗（每周期 84–100%）');
 
-// ---- 关键竖线 ----
+// ---- 事件竖线与标注（分层：跟击行 y=22，事件行 y=46，避免互撞）----
 for(let c=0;c<=CYC;c++){
-  el('line',{x1:px(c*100),y1:30,x2:px(c*100),y2:BG_BOT-16,stroke:'#57534a','stroke-width':1.2,'stroke-dasharray':'5 3',opacity:.8});
-  el('text',{x:px(c*100)+(c===CYC?-4:4),y:44,'font-size':11,fill:'#57534a','text-anchor':c===CYC?'end':'start'},'跟击 R');
+  el('line',{x1:px(c*100),y1:30,x2:px(c*100),y2:BG_BOT-18,stroke:'#57534a','stroke-width':1.2,'stroke-dasharray':'5 3',opacity:.8});
+  el('text',{x:px(c*100)+(c===CYC?-4:4),y:22,'font-size':11.5,fill:'#57534a','text-anchor':c===CYC?'end':'start'},'跟击 R');
 }
 [50,150,250].forEach(p=>{
-  el('line',{x1:px(p),y1:30,x2:px(p),y2:BG_BOT-16,stroke:'#8a8375','stroke-width':1,'stroke-dasharray':'2 4',opacity:.7});
-  el('text',{x:px(p),y:44,'font-size':11,fill:'#8a8375','text-anchor':'middle'},'跟击 L');
-});
-[84,92].forEach((p,i)=>{
-  for(let c=0;c<CYC;c++) el('line',{x1:px(c*100+p),y1:Y0,x2:px(c*100+p),y2:Y0-14,stroke:'#7a4fa3','stroke-width':1,'stroke-dasharray':'2 3',opacity:.7});
-  el('text',{x:px(p),y:Y0-20,'font-size':10.5,fill:'#7a4fa3','text-anchor':'middle'},i===0?'84% 出发':'92% 峰');
+  el('line',{x1:px(p),y1:30,x2:px(p),y2:BG_BOT-18,stroke:'#8a8375','stroke-width':1,'stroke-dasharray':'2 4',opacity:.7});
+  el('text',{x:px(p),y:22,'font-size':11.5,fill:'#8a8375','text-anchor':'middle'},'跟击 L');
 });
 for(let c=0;c<CYC;c++){
-  el('text',{x:px(c*100+60),y:Y0-6,'font-size':10.5,fill:'#57534a','text-anchor':'middle'},'60% toe-off');
+  el('line',{x1:px(c*100+84),y1:Y0,x2:px(c*100+84),y2:Y0-52,stroke:'#7a4fa3','stroke-width':1,'stroke-dasharray':'2 3',opacity:.65});
+  el('line',{x1:px(c*100+92),y1:Y0,x2:px(c*100+92),y2:Y0-30,stroke:'#7a4fa3','stroke-width':1,'stroke-dasharray':'2 3',opacity:.65});
+  el('line',{x1:px(c*100+60),y1:Y0,x2:px(c*100+60),y2:Y0-16,stroke:'#57534a','stroke-width':1,'stroke-dasharray':'2 3',opacity:.6});
 }
+el('text',{x:px(84),y:Y0-56,'font-size':11,fill:'#7a4fa3','text-anchor':'middle'},'84% 出发');
+el('text',{x:px(92),y:Y0-34,'font-size':11,fill:'#7a4fa3','text-anchor':'middle'},'92% 峰');
+el('text',{x:px(60),y:Y0-20,'font-size':11,fill:'#57534a','text-anchor':'middle'},'60% toe-off');
 
 // ---- hover 交互 ----
 const tip=document.getElementById('tip'), wrap=document.getElementById('wrap');
@@ -207,9 +209,9 @@ const phases=[
 let guide=null;
 svg.addEventListener('mousemove',e=>{
   const r=svg.getBoundingClientRect();
-  const sx=(e.clientX-r.left)/r.width*1000;
+  const sx=(e.clientX-r.left)/r.width*1200;
   const g=Math.min(TOT,Math.max(0,(sx-X0)/(X1-X0)*TOT));
-  if(!guide){guide=el('line',{x1:px(g),y1:30,x2:px(g),y2:BG_BOT-16,stroke:'#2b2a27','stroke-width':1,opacity:.45});}
+  if(!guide){guide=el('line',{x1:px(g),y1:30,x2:px(g),y2:BG_BOT-18,stroke:'#2b2a27','stroke-width':1,opacity:.45});}
   guide.setAttribute('x1',px(g));guide.setAttribute('x2',px(g));
   const p=g%100, cyc=Math.floor(g/100)+1;
   const ph=phases.find(q=>p>=q.a&&p<q.b)||phases[6];
