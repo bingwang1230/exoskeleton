@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>FBD：平地/上坡/下坡 + 髋关节切割</title>
+<style>
+  body { font-family: "PingFang SC", system-ui, sans-serif; background:#fafaf7; margin:20px; color:#222; }
+  h1 { font-size:18px; }
+  .legend { font-size:13px; color:#555; margin:6px 0 14px; }
+  .legend b.red{color:#d33}.legend b.blue{color:#2563eb}.legend b.green{color:#059669}.legend b.purple{color:#9333ea}
+  .grid { display:grid; grid-template-columns:460px 460px; gap:18px; }
+  .panel { background:#fff; border:1px solid #ddd; border-radius:8px; padding:8px; }
+  .panel h2 { font-size:14px; margin:2px 0 4px 6px; color:#333; }
+  .cap { font-size:12px; color:#666; margin:2px 0 2px 8px; }
+  text { font-size:13px; fill:#333; }
+  .small { font-size:11px; fill:#888; }
+</style>
+</head>
+<body>
+<h1>第一章 · 概念 1 配图：隔离体图（FBD）</h1>
+<div class="legend">
+  箭头颜色：<b class="red">红=重力 W（画在质心）</b> ｜ <b class="blue">蓝=法向支持力 N（⊥接触面）</b> ｜ <b class="green">绿=摩擦力 f（∥接触面）</b> ｜ <b class="purple">紫=纯力矩 M</b> ｜ 灰虚线=辅助线 ｜ 橙虚线=切割面。质心 = ⊙
+</div>
+<div class="grid">
+
+<!-- ============ P1 平地 ============ -->
+<div class="panel">
+<h2>P1 · 平地站立（整个人为一个隔离体）</h2>
+<svg viewBox="0 0 440 380" width="100%">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#d33"/></marker>
+    <marker id="ab" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#2563eb"/></marker>
+    <marker id="ag" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#059669"/></marker>
+    <marker id="ap" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#9333ea"/></marker>
+    <marker id="aor" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#ea580c"/></marker>
+  </defs>
+  <!-- ground -->
+  <line x1="50" y1="330" x2="400" y2="330" stroke="#8a7" stroke-width="3"/>
+  <line x1="50" y1="330" x2="400" y2="330" stroke="#333" stroke-width="1"/>
+  <!-- person -->
+  <circle cx="220" cy="112" r="19" fill="none" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="131" x2="220" y2="240" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="240" x2="198" y2="328" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="240" x2="242" y2="328" stroke="#333" stroke-width="2"/>
+  <!-- guide line -->
+  <line x1="220" y1="196" x2="220" y2="328" stroke="#999" stroke-dasharray="4 4" stroke-width="1"/>
+  <!-- CoM -->
+  <circle cx="220" cy="196" r="4" fill="#000"/>
+  <text x="232" y="192" class="small">质心</text>
+  <!-- W -->
+  <line x1="220" y1="200" x2="220" y2="312" stroke="#d33" stroke-width="3" marker-end="url(#ar)"/>
+  <text x="228" y="286" fill="#d33">W=mg</text>
+  <!-- N1 N2 -->
+  <line x1="198" y1="326" x2="198" y2="268" stroke="#2563eb" stroke-width="3" marker-end="url(#ab)"/>
+  <line x1="242" y1="326" x2="242" y2="268" stroke="#2563eb" stroke-width="3" marker-end="url(#ab)"/>
+  <text x="160" y="252" fill="#2563eb">N₁</text>
+  <text x="250" y="252" fill="#2563eb">N₂</text>
+  <!-- friction note -->
+  <text x="300" y="352" fill="#059669" font-size="12">f = 0（无水平滑动趋势）</text>
+</svg>
+<div class="cap">N₁+N₂ = W；重力与支持力共线（灰虚线过质心与双脚之间）——不移、不转，平衡。</div>
+</div>
+
+<!-- ============ P2 上坡 ============ -->
+<div class="panel">
+<h2>P2 · 坡道站立（脸朝上坡，θ≈12°）</h2>
+<svg viewBox="0 0 440 380" width="100%">
+  <defs>
+    <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#d33"/></marker>
+    <marker id="ab2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#2563eb"/></marker>
+    <marker id="ag2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#059669"/></marker>
+  </defs>
+  <!-- slope: rising to the LEFT (uphill = left). passes through C(220,330) -->
+  <polygon points="50,292.9 390,367.1 390,375 50,375" fill="#e8e4da"/>
+  <line x1="50" y1="292.9" x2="390" y2="367.1" stroke="#8a7" stroke-width="3"/>
+  <line x1="50" y1="292.9" x2="390" y2="367.1" stroke="#333" stroke-width="1"/>
+  <!-- theta at right vertex (390,367.1): horizontal dashed to the left -->
+  <line x1="390" y1="367.1" x2="310" y2="367.1" stroke="#999" stroke-dasharray="4 4" stroke-width="1"/>
+  <path d="M 330 367.1 A 60 60 0 0 1 331.4 354.3" fill="none" stroke="#555" stroke-width="1.2"/>
+  <text x="342" y="360" class="small">θ</text>
+  <!-- person above C(220,330) -->
+  <circle cx="220" cy="118" r="19" fill="none" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="137" x2="220" y2="242" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="242" x2="212" y2="326" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="242" x2="228" y2="326" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="200" x2="220" y2="328" stroke="#999" stroke-dasharray="4 4" stroke-width="1"/>
+  <circle cx="220" cy="200" r="4" fill="#000"/>
+  <text x="232" y="196" class="small">质心</text>
+  <!-- W -->
+  <line x1="220" y1="204" x2="220" y2="312" stroke="#d33" stroke-width="3" marker-end="url(#ar2)"/>
+  <text x="228" y="290" fill="#d33">W</text>
+  <!-- N ⟂ slope, tips up-right: (220,330)->(235,261.6) -->
+  <line x1="220" y1="330" x2="235" y2="261.6" stroke="#2563eb" stroke-width="3" marker-end="url(#ab2)"/>
+  <text x="242" y="262" fill="#2563eb">N</text>
+  <!-- f up-slope (to the left-up): (220,330)->(161.4,317.2) -->
+  <line x1="220" y1="330" x2="161.4" y2="317.2" stroke="#059669" stroke-width="3" marker-end="url(#ag2)"/>
+  <text x="150" y="316" fill="#059669">f</text>
+  <!-- legend -->
+  <text x="300" y="60" font-size="12" fill="#2563eb">N = W·cosθ（⊥坡面）</text>
+  <text x="300" y="78" font-size="12" fill="#059669">f = W·sinθ（沿坡向上）</text>
+  <text x="300" y="96" font-size="12" fill="#555">合力 N+f 恰好竖直向上</text>
+</svg>
+<div class="cap">摩擦 f 沿坡面向上，抵消「下滑趋势」；N 与 f 的合力恰好竖直、与 W 共线过接触点。</div>
+</div>
+
+<!-- ============ P3 下坡 ============ -->
+<div class="panel">
+<h2>P3 · 坡道站立（脸朝下坡——和 P2 对比）</h2>
+<svg viewBox="0 0 440 380" width="100%">
+  <defs>
+    <marker id="ar3" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#d33"/></marker>
+    <marker id="ab3" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#2563eb"/></marker>
+    <marker id="ag3" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#059669"/></marker>
+  </defs>
+  <!-- slope: rising to the RIGHT (uphill = right). passes through C(220,330) -->
+  <polygon points="50,367.1 390,292.9 390,375 50,375" fill="#e8e4da"/>
+  <line x1="50" y1="367.1" x2="390" y2="292.9" stroke="#8a7" stroke-width="3"/>
+  <line x1="50" y1="367.1" x2="390" y2="292.9" stroke="#333" stroke-width="1"/>
+  <!-- theta at left vertex (50,367.1): horizontal dashed to the right -->
+  <line x1="50" y1="367.1" x2="130" y2="367.1" stroke="#999" stroke-dasharray="4 4" stroke-width="1"/>
+  <path d="M 110 367.1 A 60 60 0 0 0 108.6 354.3" fill="none" stroke="#555" stroke-width="1.2"/>
+  <text x="88" y="354" class="small">θ</text>
+  <!-- person above C(220,330) -->
+  <circle cx="220" cy="118" r="19" fill="none" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="137" x2="220" y2="242" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="242" x2="212" y2="326" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="242" x2="228" y2="326" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="200" x2="220" y2="328" stroke="#999" stroke-dasharray="4 4" stroke-width="1"/>
+  <circle cx="220" cy="200" r="4" fill="#000"/>
+  <text x="232" y="196" class="small">质心</text>
+  <!-- W -->
+  <line x1="220" y1="204" x2="220" y2="312" stroke="#d33" stroke-width="3" marker-end="url(#ar3)"/>
+  <text x="228" y="290" fill="#d33">W</text>
+  <!-- N ⟂ slope, tips up-left: (220,330)->(205,261.6) -->
+  <line x1="220" y1="330" x2="205" y2="261.6" stroke="#2563eb" stroke-width="3" marker-end="url(#ab3)"/>
+  <text x="184" y="262" fill="#2563eb">N</text>
+  <!-- f up-slope (to the right-up): (220,330)->(278.6,317.2) -->
+  <line x1="220" y1="330" x2="278.6" y2="317.2" stroke="#059669" stroke-width="3" marker-end="url(#ag3)"/>
+  <text x="288" y="316" fill="#059669">f</text>
+  <!-- legend -->
+  <text x="55" y="60" font-size="12" fill="#2563eb">N = W·cosθ（⊥坡面）</text>
+  <text x="55" y="78" font-size="12" fill="#059669">f = W·sinθ（沿坡向上）</text>
+  <text x="55" y="96" font-size="12" fill="#555">和 P2 完全一样（镜像）</text>
+</svg>
+<div class="cap">脸朝哪不进 FBD——上坡站与下坡站，受力图一模一样；区别只在真实世界的姿势与肌肉。</div>
+</div>
+
+<!-- ============ P4 髋关节切割 ============ -->
+<div class="panel">
+<h2>P4 · 求髋关节力矩：在髋处切一刀（两个隔离体）</h2>
+<svg viewBox="0 0 440 380" width="100%">
+  <defs>
+    <marker id="ar4" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#d33"/></marker>
+    <marker id="ab4" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#2563eb"/></marker>
+    <marker id="ap4" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 z" fill="#9333ea"/></marker>
+  </defs>
+  <!-- ground -->
+  <line x1="60" y1="330" x2="390" y2="330" stroke="#8a7" stroke-width="3"/>
+  <line x1="60" y1="330" x2="390" y2="330" stroke="#333" stroke-width="1"/>
+  <!-- cut plane -->
+  <line x1="220" y1="52" x2="220" y2="240" stroke="#ea580c" stroke-dasharray="6 5" stroke-width="2"/>
+  <text x="228" y="60" fill="#ea580c" font-size="12">切割面（髋）</text>
+  <!-- upper body: head + torso block, CoM forward (right) of hip -->
+  <circle cx="220" cy="74" r="15" fill="none" stroke="#333" stroke-width="2"/>
+  <rect x="172" y="90" width="96" height="105" rx="12" fill="#fdf0ef" stroke="#333" stroke-width="2"/>
+  <text x="220" y="120" class="small" text-anchor="middle">上半身</text>
+  <text x="220" y="136" class="small" text-anchor="middle">(头+躯干+双臂)</text>
+  <!-- d dimension -->
+  <line x1="220" y1="158" x2="248" y2="158" stroke="#555" stroke-width="1.2"/>
+  <line x1="220" y1="153" x2="220" y2="163" stroke="#555" stroke-width="1.2"/>
+  <line x1="248" y1="153" x2="248" y2="163" stroke="#555" stroke-width="1.2"/>
+  <text x="234" y="151" class="small" text-anchor="middle">d</text>
+  <!-- CoM upper -->
+  <circle cx="248" cy="168" r="4" fill="#000"/>
+  <text x="256" y="164" class="small">质心(上)</text>
+  <!-- W upper -->
+  <line x1="248" y1="172" x2="248" y2="252" stroke="#d33" stroke-width="3" marker-end="url(#ar4)"/>
+  <text x="256" y="232" fill="#d33">W上</text>
+  <!-- hip point -->
+  <circle cx="220" cy="195" r="3.5" fill="#000"/>
+  <text x="200" y="190" fill="#333" text-anchor="end">髋</text>
+  <!-- F on upper body (from lower body), upward -->
+  <line x1="220" y1="195" x2="220" y2="168" stroke="#2563eb" stroke-width="3" marker-end="url(#ab4)"/>
+  <text x="230" y="180" fill="#2563eb">F</text>
+  <!-- M on upper body: ccw arc, left side of hip: from 12 o'clock to 9 o'clock -->
+  <path d="M 220 151 A 44 44 0 0 0 176 195" fill="none" stroke="#9333ea" stroke-width="2.5" marker-end="url(#ap4)"/>
+  <text x="160" y="188" fill="#9333ea">M</text>
+  <!-- lower body -->
+  <line x1="220" y1="195" x2="192" y2="326" stroke="#333" stroke-width="2"/>
+  <line x1="220" y1="195" x2="248" y2="326" stroke="#333" stroke-width="2"/>
+  <line x1="176" y1="328" x2="208" y2="328" stroke="#333" stroke-width="2"/>
+  <line x1="232" y1="328" x2="264" y2="328" stroke="#333" stroke-width="2"/>
+  <text x="290" y="270" class="small">下半身</text>
+  <text x="290" y="286" class="small">(大腿+小腿+足)</text>
+  <!-- CoM lower -->
+  <circle cx="204" cy="262" r="4" fill="#000"/>
+  <!-- W lower -->
+  <line x1="204" y1="266" x2="204" y2="322" stroke="#d33" stroke-width="3" marker-end="url(#ar4)"/>
+  <text x="196" y="318" fill="#d33" text-anchor="end">W下</text>
+  <!-- N at feet -->
+  <line x1="176" y1="326" x2="176" y2="284" stroke="#2563eb" stroke-width="3" marker-end="url(#ab4)"/>
+  <line x1="264" y1="326" x2="264" y2="284" stroke="#2563eb" stroke-width="3" marker-end="url(#ab4)"/>
+  <text x="150" y="288" fill="#2563eb">N</text>
+  <text x="272" y="288" fill="#2563eb">N</text>
+  <!-- reaction on lower body at hip: F' down, M' opposite -->
+  <line x1="220" y1="195" x2="220" y2="252" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="7 4" marker-end="url(#ab4)"/>
+  <path d="M 220 239 A 44 44 0 0 1 176 195" fill="none" stroke="#9333ea" stroke-width="2.5" stroke-dasharray="7 4" marker-end="url(#ap4)"/>
+  <text x="168" y="238" fill="#9333ea">M′</text>
+  <text x="196" y="256" fill="#2563eb" text-anchor="end" class="small">F′</text>
+  <!-- annotations -->
+  <text x="320" y="150" font-size="12" fill="#9333ea">对上半身取矩：</text>
+  <text x="320" y="166" font-size="12" fill="#9333ea">ΣM髋 = 0</text>
+  <text x="320" y="182" font-size="12" fill="#9333ea">→ M = W上·d</text>
+  <text x="320" y="204" font-size="12" fill="#555">F′=−F，M′=−M</text>
+  <text x="320" y="220" font-size="12" fill="#555">(牛顿第三定律)</text>
+</svg>
+<div class="cap">d=0（质心恰在髋正上方）时 M=0——笔直站立髋几乎不出力；d 越大，髋力矩越大。</div>
+</div>
+
+</div>
+</body>
+</html>
