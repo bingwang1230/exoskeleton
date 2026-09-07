@@ -33,6 +33,16 @@ learn/
    - 已存在 → 读取当前进度
 3. 直接开始学习新概念。除非用户主动说想复习，否则不需要问「复习还是学新」。
 
+## 配图讲解（2026-09-07）
+
+论文/教材原文的图是学习材料的一部分，讲解时应主动用图，而不是纯文字描述：
+
+- **首次进入含 PDF 的科目**：用 `pdfimages -list` 盘点插图 → `pdfimages -png <pdf> figures/img` 提取到 `materials/figures/`，按 `figN_内容描述.png` 重命名（git 忽略，随 materials 走）
+- **讲解时引用图片**：给出 `materials/figures/xxx.png` 路径并说明「看这张图的同时读下面的讲解」；本地补充材料（biorxiv 等）的图也入 `figures/`，文件名标来源（如 `biorxiv_S1_传动设计.jpg`）
+- **AI 无图像输入时**：按页码/图注推断图与概念的对应关系，文件名标注「按页码推断、未目检」，并请用户目检确认；图注文本（caption）优先抓全，落在 `figures/README.md` 里——图注不受图片限流影响，且本身是高浓度信息
+- **没有现成图时**：自绘 ASCII 示意图代替，不硬等原图
+- **正式版 SM 缺失的补齐路径**：science.org 直链在 headless 下常被 Cloudflare 拦，可用共享 profile 浏览器 + `browser_await_human` 过验证后页内抓取；仍拿不到就登记「待确认」请用户手动下载放入 `materials/`，不阻塞学习
+
 ## PROGRESS.md 格式
 
 ```markdown
