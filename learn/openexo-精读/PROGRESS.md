@@ -5,6 +5,8 @@
 > 论文：Science Robotics 2025-06-25（biorxiv 2024-10-03 预印本）｜配套工程精读笔记：`../../../reports/20260830.OpenExo精读初稿.md`
 > 学习目标：吃透踝构型的硬件与控制（P1 复现对象），建立可写进仿真的参数表
 
+> **勘误（2026-09-09，用户改定博客时发现）**：Teensy 控制环频率，论文原文为 **500 Hz**（Science Robotics 2025 Software 节："Sensor data are collected and integrated with the control code at 500 Hz"，即一圈 2ms）。此前笔记多处写「1kHz」（ch02/ch03×3/ch04/学思笔记）系 AI 口误/行规泛化，非论文数据——阅读旧笔记时以 500Hz 为准；相关论证（闭环带宽余量、遥测带宽账）量级结论不变。
+
 ## 一、摘要与引言
 
 | 概念 | 掌握度 | 笔记文件 |
