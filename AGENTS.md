@@ -19,8 +19,8 @@
 | `reports/` | 项目调研报告（`YYYYMMDD.标题.md`） |
 | `learn/` | 学科学习（L1–L6），每科一个子目录，协议见 `learn/learn.md` |
 | `content/` | 内容素材台账（INDEX + 文本条目；**只放素材，成品不放**，纪律见 §10） |
-| `scripts/` | 运维脚本（daily-pm 提醒、volume_sync 外接盘备份） |
-| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git，每日 03:40 自动同步 ext2，见 `scripts/volume_sync/`） |
+| `scripts/` | 运维脚本（daily-pm 提醒） |
+| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git；2026-09-11 起为指向 `/Volumes/ext2/pebble_volume/20260829.exoskeleton/` 的符号链接，数据原生住 ext2，ext1 每日镜像 + SSD 周备份接管，见 pebble_space 备份方案） |
 | 代码工件 | 不在本仓库：网站/仿真等开工时各自独立建仓，链接登记进 PROGRESS.md 卫星索引 |
 
 ## 3. 铁律（违者按编造或越权处理）
