@@ -94,7 +94,7 @@
 |---|---|---|---|
 | L1 数学力学 | 学 | learn/l1-数学力学/ | 🟡 概念 1-3 完成（FBD 0.7 / 力矩力臂 0.7 / 平衡方程 0.7，含手算拍照存档），下一概念平面简化（第一章收尾） |
 | L2 机械材料 | 学 | learn/l2-机械材料/（未建） | ⚪ |
-| L3 电子动力 | 学 | learn/l3-电子动力/ | 🟡 第一章实操收官（09-15 V1 桌面版链路全通：接线/刷 MicroPython/浏览器实时曲线，ch01 0.4–0.6 待裸重演、ch02 V1 桌面版 0.7）；接线图在 materials/，固件与脚本 ~/code/exo-fsr（github 私有 bingwang1230/exo-fsr，09-15 建） |
+| L3 电子动力 | 学 | learn/l3-电子动力/ | 🟡 第一章实操收官（09-15 V1 桌面版链路全通：接线/刷 MicroPython/浏览器实时曲线，ch01 0.4–0.6 待裸重演、ch02 V1 桌面版 0.7）；接线图在 materials/，固件与脚本 ~/code/exo-fsr（bingwang1230/exo-fsr，gitee+github 双推同 exoskeleton 惯例；github 09-15 开源·MIT——首个对外开源工件） |
 | L4 控制与 AI | 学 | learn/l4-控制与ai/（未建） | ⚪ |
 | L5 生物力学与老年科学 | 学 | learn/l5-生物力学/（未建） | ⚪ |
 | L6 人因标准合规 | 学 | learn/l6-人因合规/（未建） | ⚪ |
