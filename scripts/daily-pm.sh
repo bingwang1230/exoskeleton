@@ -1,5 +1,5 @@
 #!/bin/bash
-# 外骨骼计划 · 每日项目经理提醒（v5：先总结后建议，决策十八；v4：周日双会话）
+# 外骨骼计划 · 每日项目经理提醒（v5.1：last.md 追加制+周日清空，决策二十四；v5：先总结后建议，决策十八；v4：周日双会话）
 # 主触发：launchd local.exoskeleton-daily-pm（每日 08:00）—— 唯一触发源（2026-09-07 第十九决策移除 pi-subagents 兜底 schedule）
 # 交付：每天一条「每日提醒 · 日期」命名会话（先总结昨天、再建议今天）；周日额外一条「周复盘 · 日期」（先总结本周、再起草下周）。
 #        未读会话即提醒；用户进入回复后该会话转常态会话（可落账）；Bark 推送作手机端入口。
@@ -78,7 +78,8 @@ fi
 mkdir "$LOCK" 2>/dev/null || { echo "[$(date '+%F %T')] 另一实例在跑，退出"; exit 0; }
 trap 'rmdir "$LOCK" 2>/dev/null' EXIT
 
-# ---- 单条会话：跑 LLM → 建 session → 推 Bark → 记 last.md ----
+# ---- 单条会话：跑 LLM → 建 session → 推 Bark → 追记 last.md（v5.1：追加制，文件尾=上次建议）----
+DAILY_OK=0
 run_one() { # $1=会话名 $2=user开场白 $3=Bark标题前缀
   local sname="$1" umsg="$2" btitle="$3" out msg body title
   out="$(perl -e 'alarm 900; exec @ARGV' "$PI_BIN" --no-extensions -n "$sname" -p "$umsg" 2>>"$LOG_DIR/daily-pm.err")"
@@ -94,15 +95,19 @@ run_one() { # $1=会话名 $2=user开场白 $3=Bark标题前缀
   echo "[$(date '+%F %T')] OK name=$sname (force=${DAILY_PM_FORCE:-0})"
 }
 
-: >"$LAST"
-
 # ---- 每日提醒（每天，含周日）----
 RC=0
-run_one "每日提醒 · $TODAY" "每天早上的定时提醒到了：先用一行总结昨天做了什么（昨天 git 提交 + 对照上次建议的执行情况，无提交就如实说无），再给今天适合做什么的建议。" "外骨骼今日建议" || RC=1
+run_one "每日提醒 · $TODAY" "每天早上的定时提醒到了：先用一行总结昨天做了什么（昨天 git 提交 + 对照上次建议的执行情况，无提交就如实说无），再给今天适合做什么的建议。" "外骨骼今日建议" && DAILY_OK=1 || RC=1
 
 # ---- 周复盘（仅周日，与每日并存）----
 if [ "$DOW" = "7" ]; then
   run_one "周复盘 · $TODAY" "开始本周复盘吧：先总结这一周做了什么（本周 git 提交 + 周记，对照周初计划逐项勾稽），再汇总实际人时、起草下周计划——我确认后再落账。" "外骨骼周复盘" || RC=1
+fi
+
+# ---- 周清 last.md（v5.1，决策二十四）：追加制下每周日跑完清空迎新周（周日起算）；测试运行不清 ----
+if [ "$DOW" = "7" ] && [ "${DAILY_PM_FORCE:-0}" != "1" ]; then
+  : >"$LAST"
+  echo "[$(date '+%F %T')] 周清 last.md 完成"
 fi
 
 # ---- 结束语义 ----
@@ -110,8 +115,8 @@ if [ "$RC" = "0" ]; then
   [ "${DAILY_PM_FORCE:-0}" != "1" ] && echo "$TODAY" >"$STAMP"
   exit 0
 fi
-if ! grep -q "^session: 每日提醒" "$LAST" 2>/dev/null; then
-  # 每日提醒本体失败：不写 stamp（当天可手动补发），推失败通知
+# 每日本体失败（DAILY_OK=0）：不写 stamp（当天可手动补发），推失败通知
+if [ "$DAILY_OK" != "1" ]; then
   push_bark "外骨骼今日建议 · $TODAY" "今日提醒生成失败（详见 .pi/logs/daily-pm.err）。可手动补发：bash scripts/daily-pm.sh" || true
   exit 1
 fi
