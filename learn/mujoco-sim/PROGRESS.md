@@ -1,6 +1,6 @@
 # 《MuJoCo 仿真与建模》学习进度
 
-> 最后更新：2026-09-12（第三章 tendon 开课进行中；学习方式改审查者模式）
+> 最后更新：2026-09-16（第三章 tendon 收官：审查题通过；学习方式=审查者模式）
 > 材料载体：`~/code/exo-sim`（leg0.xml 起步）+ MuJoCo 官方文档；学科性质：**操作型**（建模/仿真，0.7+ 须走裸重演 + 代码/仿真验证三段式）
 > 环境：MBP `~/code/exo-sim`（uv venv + MuJoCo 3.12.0），双击 `~/Applications/MuJoCoViewer.app` 启动
 
@@ -32,7 +32,8 @@
 |------|--------|----------|
 | fixed vs spatial tendon；绳长守恒 ≠ 张力恒定 | 0.5 | notes/ch03_tendon传动.md |
 | coef 物理意义（=滑轮半径，用户自行推导） | 0.6 | 同上 |
-| 执行器绑 tendon 后 ctrl 单位变张力（力矩=张力×半径） | 0.5（静力学对拍已展示，待用户审查题确认） | 同上 |
+| 执行器绑 tendon 后 ctrl 单位变张力（力矩=张力×半径） | 0.6（09-16 审查题过；张力双重记账纠错一次、coef 语义滑了一下当场纠正） | 同上 |
+| 关节限位=约束力（qfrc_constraint/efc 限位）：停转位置由 range 定、门框受压由张力定 | 0.6（09-16 审查题：数字对位+单位陷阱用户自己完成，机制由判卷补全） | 同上 |
 | 审查者模式 6 条清单 | 0.3 | 同上 |
 
 ## 待学（后续章节候选）
@@ -49,3 +50,4 @@
 - @2026-09-03 首次会话：环境跑通（viewer + 双击 App）；逐行讲解 leg0.xml（刚体树/joint=自由度/弹簧踝/geom 质量）；动手改模型加了 ankle 位置伺服（我出的改法，用户录入），在 viewer 里区分了 Joint（读数）vs Control（伺服目标）面板；掌握度全部初评（讨论为主，尚无独立产出证据，偏保守）
 - @2026-09-04 第二课：position 换 motor 力矩执行器；viewer 手感估平衡 ctrl≈0.63 → 静力学对拍复现理论 0.59（θ=arccos 公式）；踩中 MJCF 角度默认度的坑（踝被限位焊死 ±0.7°），compiler angle=radian 修复。证据：exo-sim statics_test.py 对拍输出 + 亲手 viewer 实验（掌握度按有独立实验证据评）。
 - @2026-09-12 第三课（未完）：tendon 两类/coef 推导/张力换算静力学对拍（10.09 N 手算=仿真命中）；XML 基础大答疑（plane 半宽/rgba/capsule fromto 中轴线±半径/关节=约束无尺寸/four joint types/蓝图+接线板心智模型）。学习方式调整：不做默写改审查者模式（用户拍板）。流程 bug 教训入 learn.md 规则 8。停在审查题（限位停转），下次先答后推进。
+- @2026-09-16 第四课（收官）：审查题「12N 为何停在 -45.9°」通过——用户自行完成弧度换算对位 range（-45.9°=-0.8 rad 下限 / 5N 档 +34.4°=+0.6 rad 上限）并点名 radian 单位陷阱；两处纠错（tendon 张力双重记账、coef 误记为关节角度）；机制由判卷补全（求解器约束力 qfrc_constraint=门框）。实证：tendon_qfrc_check.py 四路记账平账（10.1N constraint=0.000 自由平衡 / 12N +0.106 / 15N 同角度 +0.282）。顺带纠正用户心智模型：tendon/actuator 是顶层接线板（与 worldbody 平行），不在 worldbody 里；joint 长在身体里。下一课候选：双向耦合 motor_side / spatial 滑轮。
