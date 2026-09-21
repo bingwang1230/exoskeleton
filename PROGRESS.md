@@ -66,7 +66,7 @@
 
 ### 跨期待办（不挂阶段门，等外部事件触发）
 
-- [ ] **volume 迁移完成后**（硬盘盒迁移中，等用户通知；09-19 记）：①把本仓 `learn/*/materials/`（论文 PDF、网页快照，git 外）复制备份到 volume——届时新建「学习材料/」子目录按科目镜像，迁移完成前不动 ext2；②同步把 pebble_space `learn_projects/*/materials/` 一并备份到 volume（用户交代：learn project 的 material 届时也要进 volume）
+- [x] **volume 迁移完成后**（硬盘盒迁移中，等用户通知；09-19 记）：①把本仓 `learn/*/materials/`（论文 PDF、网页快照，git 外）复制备份到 volume——届时新建「学习材料/」子目录按科目镜像，迁移完成前不动 ext2；②同步把 pebble_space `learn_projects/*/materials/` 一并备份到 volume（用户交代：learn project 的 material 届时也要进 volume）——✅ **09-21 执行完毕**：链接切 tank1（旧 ext2 已下线，链接原本悬空，无损切换）；①本仓 4 科 21 文件（e2e 5/皮肤 2/l3 4/openexo 10）→ `volume/学习材料/exoskeleton/`；②pebble_space 2 科 5 文件 → `tank1/pebble_volume/learn_projects/`；文件数对账全对；当晚 04:30 tank2 镜像自动获第二副本。后续材料新增随手 rsync（命令见本次 commit）
 
 ## 3. 本周计划（2026-09-20 日 ~ 09-26 六，周日起算）
 
