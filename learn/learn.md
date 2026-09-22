@@ -19,10 +19,13 @@ description: 交互式学习工具 — 通过自由探讨深度理解非虚构�
 
 ```
 learn/
-└── {科目}/
+└── {YYYYMMDD.科目}/          # 日期=开科日，与 tank1 正本目录同名（2026-09-22 起规范）
     ├── PROGRESS.md          # 该科进度文件
-    ├── materials/           # 学习材料（markdown / 纯文本，用户自行放入；git 忽略）
-    └── notes/               # 学习笔记（由你生成和管理）
+    ├── materials/           # 学习材料（PDF/数据手册/快照等）——符号链接，正本住
+    │                        # tank1 /Volumes/tank1/pebble_volume/learn_projects/<同名目录>/
+    │                        # （经 ~/pebble_space/volume/learn_projects 中转；tank2 每日镜像 +
+    │                        # SSD 周备份；直接放入即入备份链，git 只追踪链接不追踪内容）
+    └── notes/               # 学习笔记（由你生成和管理；进 git）
 ```
 
 ## 启动流程

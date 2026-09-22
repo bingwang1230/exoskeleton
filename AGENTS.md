@@ -17,11 +17,11 @@
 | `docs/三线计划.md` | 计划：叙事词库/人机分工/平台流水线/阶段判据门 |
 | `docs/决策记录.md` | 追加式决策日志（只增不改，最新在上） |
 | `reports/` | 项目调研报告（`YYYYMMDD.标题.md`） |
-| `learn/` | 学科学习（L1–L6），每科一个子目录，协议见 `learn/learn.md` |
+| `learn/` | 学科学习（L1–L6），每科一个子目录，**命名 `YYYYMMDD.科目名`**（日期=开科日，与 tank1 正本目录同名），协议见 `learn/learn.md` |
 | `content/` | 内容素材台账（INDEX + 文本条目；**只放素材，成品不放**，纪律见 §10） |
 | `scripts/` | 运维脚本（daily-pm 提醒） |
 | `skills/` | AI 技能库（本仓沉淀的可复用操作技能，如电路图绘制；pi 侧安装副本在 `~/.pi/agent/skills/`，双机同步靠 git） |
-| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git；2026-09-11 起为符号链接，**2026-09-21 硬盘盒迁移后指向 `/Volumes/tank1/pebble_volume/20260829.exoskeleton/`**，数据原生住 tank1，tank2 每日镜像 04:30（pebble-sync mirror-daily）+ SSD 周备份接管；`学习材料/exoskeleton/` 子目录为本仓 learn/*/materials/ 的手动 rsync 备份镜像，材料新增后随手同步） |
+| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git；2026-09-11 起为符号链接，**2026-09-21 硬盘盒迁移后指向 `/Volumes/tank1/pebble_volume/20260829.exoskeleton/`**，数据原生住 tank1，tank2 每日镜像 04:30（pebble-sync mirror-daily）+ SSD 周备份接管） |
 | 代码工件 | 不在本仓库：网站/仿真等开工时各自独立建仓，链接登记进 PROGRESS.md 卫星索引 |
 
 ## 3. 铁律（违者按编造或越权处理）
@@ -73,8 +73,13 @@
 
 ## 7. 学习进度管理
 
-- 每科一个目录：`learn/<科目>/`（`materials/`、`notes/`、`PROGRESS.md`），协议用 `learn/learn.md`（掌握度 0–1、操作型三段式验证）。
-- 开新科：建目录 → 根 `PROGRESS.md` 卫星索引与学习排期登记 → 不需决策记录条目（属执行层）。
+- 每科一个目录：`learn/<YYYYMMDD.科目名>/`（`materials/`、`notes/`、`PROGRESS.md`），协议用 `learn/learn.md`（掌握度 0–1、操作型三段式验证）。
+- **materials 永远是符号链接**（2026-09-22 起）：`materials -> ../../../pebble_space/volume/learn_projects/<同名目录>` → tank1
+  `/Volumes/tank1/pebble_volume/learn_projects/<同名目录>`（正本；tank2 每日镜像 + SSD 周备份）。学习材料（PDF/数据手册/快照，
+  放不进 git 的）直接丢进 materials 即入 tank1 备份链，git 不追踪内容、只追踪链接本身。历史上个别 materials 内 md 曾进 git，
+  已迁往 tank1（旧版本在 git 历史）。
+- 开新科：建目录（**先在 tank1 learn_projects 下建 `YYYYMMDD.科目名` 目录**，再建链接）→ 根 `PROGRESS.md` 卫星索引与学习排期登记
+  → 不需决策记录条目（属执行层）。后续 pebble_space 将上线「学习项目材料管理」项目，新建学习项目时自动建 tank1 目录与链接。
 - 排期：根 `PROGRESS.md`「学习排期」表维护；调整 = 改表 + 周记提一笔。
 
 ## 8. 出处
