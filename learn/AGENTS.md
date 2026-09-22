@@ -1,9 +1,7 @@
-```
-name: learn
-description: 交互式学习工具 — 通过自由探讨深度理解非虚构材料，支持自适应掌握度追踪和间隔复习
-```
+<!-- learn 协议正本（2026-09-26 由 learn.md 更名：pi 从 cwd 向上收集 AGENTS.md 全链注入，
+     本科目 session 启动即自动携带本协议，不再依赖「先读 learn.md」的自觉） -->
 
-> 本协议复制自 pebble_space `learn_projects/learn.md`（2026-08-29）。在本仓库内：`learn_projects/{项目名}` 对应 `learn/{科目}/`；科目清单与排期见根目录 PROGRESS.md §4/§5。
+> 本协议源自 pebble_space `learn_projects/AGENTS.md`（2026-08-29 起双仓同步维护）。在本仓库内：`learn_projects/{项目名}` 对应 `learn/{科目}/`；科目清单与排期见根目录 PROGRESS.md §4/§5。
 
 ## 定位
 
@@ -243,3 +241,9 @@ learn/
 - 简要总结本次学习成果
 
 4. 当用户完成一整个 session 对话，要求整理完整学习笔记时，基于完整的对话记录，生成一份连贯的总结笔记。这份总结不是简单拼接概念，而是把跨概念的思考脉络串起来——哪些误解是关联的、哪个讨论触发了对另一个概念的反思、整体理解是如何演进的、期间有哪些发散的思考和追问、练习中的表现等等。输出到 `learn/{科目}/notes/YYYYMMDD_{课程章节笔记名}.md`。
+
+## 提交纪律（2026-09-26 增）
+
+学习 session 里的 git 提交只属于本科目目录：`git status --short` 看清单后**逐文件
+`git add learn/<本科目>/...`**，禁止 `git add -A` / `git add .`（多会话并行，全量加会
+扫进别人的在途改动）；状态区出现本科目之外的变更不要动它。

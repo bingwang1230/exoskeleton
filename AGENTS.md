@@ -17,7 +17,7 @@
 | `docs/三线计划.md` | 计划：叙事词库/人机分工/平台流水线/阶段判据门 |
 | `docs/决策记录.md` | 追加式决策日志（只增不改，最新在上） |
 | `reports/` | 项目调研报告（`YYYYMMDD.标题.md`） |
-| `learn/` | 学科学习（L1–L6），每科一个子目录，**命名 `YYYYMMDD.科目名`**（日期=开科日，与 tank1 正本目录同名），协议见 `learn/learn.md` |
+| `learn/` | 学科学习（L1–L6），每科一个子目录，**命名 `YYYYMMDD.科目名`**（日期=开科日，与 tank1 正本目录同名），协议 = `learn/AGENTS.md`（2026-09-26 由 learn.md 更名——pi 自动注入全链 AGENTS.md，session 启动即携带） |
 | `content/` | 内容素材台账（INDEX + 文本条目；**只放素材，成品不放**，纪律见 §10） |
 | `scripts/` | 运维脚本（daily-pm 提醒） |
 | `skills/` | AI 技能库（本仓沉淀的可复用操作技能，如电路图绘制；pi 侧安装副本在 `~/.pi/agent/skills/`，双机同步靠 git） |
@@ -73,7 +73,7 @@
 
 ## 7. 学习进度管理
 
-- 每科一个目录：`learn/<YYYYMMDD.科目名>/`（`materials/`、`notes/`、`PROGRESS.md`），协议用 `learn/learn.md`（掌握度 0–1、操作型三段式验证）。
+- 每科一个目录：`learn/<YYYYMMDD.科目名>/`（`materials/`、`notes/`、`PROGRESS.md`），协议用 `learn/AGENTS.md`（掌握度 0–1、操作型三段式验证，session 自动注入）。
 - **materials 永远是符号链接**（2026-09-22 起）：`materials -> ../../../pebble_space/volume/learn_projects/<同名目录>` → tank1
   `/Volumes/tank1/pebble_volume/learn_projects/<同名目录>`（正本；tank2 每日镜像 + SSD 周备份）。学习材料（PDF/数据手册/快照，
   放不进 git 的）直接丢进 materials 即入 tank1 备份链，git 不追踪内容、只追踪链接本身。历史上个别 materials 内 md 曾进 git，
