@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分压器对数灵敏度——为什么是 330Ω</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+         background:#fafafa; color:#222; max-width:960px; margin:0 auto; padding:16px; }
+  h1 { font-size:20px; margin:8px 0 4px; }
+  h2 { font-size:16px; margin:24px 0 4px; }
+  .sub { color:#666; font-size:13px; margin-bottom:12px; }
+  .panel { background:#fff; border:1px solid #e0e0e0; border-radius:8px; padding:12px; }
+  .legend { font-size:13px; margin:6px 0 0 4px; }
+  .legend span { margin-right:16px; white-space:nowrap; }
+  .sw { display:inline-block; width:18px; height:3px; vertical-align:middle; margin-right:4px; border-radius:2px; }
+  label.chk { font-size:13px; margin-right:14px; cursor:pointer; }
+  .note { font-size:13px; color:#555; line-height:1.6; margin-top:8px; }
+  code { background:#f0f0f0; padding:1px 5px; border-radius:4px; font-size:12.5px; }
+  .eq { text-align:center; font-size:15px; margin:6px 0; }
+</style>
+</head>
+<body>
+<h1>分压器的「瞄准」性质：对数灵敏度曲线</h1>
+<div class="sub">L3 ch02 · V2 分压预习配图 · 2026-09-24 · 单位与口径见页底</div>
+
+<h2>① 灵敏度曲线 g(R<sub>F</sub>) —— 瞄准镜本身</h2>
+<div class="panel">
+  <svg id="plot1" width="920" height="380" viewBox="0 0 920 380"></svg>
+  <div class="legend">
+    <span><span class="sw" style="background:#1a7f37"></span>R<sub>f</sub>=10kΩ（V1，轻压段）</span>
+    <span><span class="sw" style="background:#c62828"></span>R<sub>f</sub>=330Ω（V2，重压段）</span>
+    <span><span class="sw" style="background:#1a7f37;opacity:.15"></span>指尖轻压段（0.3–5N）</span>
+    <span><span class="sw" style="background:#c62828;opacity:.15"></span>鞋内站立/行走段（几十牛级）</span>
+  </div>
+  <div class="note">
+    纵轴 = 电阻每变化十倍（一个 decade），V<sub>out</sub> 变化多少伏。
+    每条曲线都是一个<b>以 R<sub>F</sub>=R<sub>f</sub> 为中心的钟形</b>（峰值 1.9V/decade）——
+    换 R<sub>f</sub> 就是把钟形在对数轴上平移：<b>瞄准哪段电阻，就瞄准哪段力</b>（FSR 幂律：力十倍 ≈ 电阻一个数量级）。
+  </div>
+</div>
+
+<h2>② 传输曲线 V<sub>out</sub>(R<sub>F</sub>) —— 两拓扑互为镜像</h2>
+<div class="panel">
+  <div style="font-size:13px; margin-bottom:4px;">
+    <label class="chk"><input type="checkbox" id="cbA" checked> V1 拓扑（FSR 上 / R<sub>f</sub> 下，越压读数↑）</label>
+    <label class="chk"><input type="checkbox" id="cbB" checked> V2 拓扑（R<sub>f</sub> 上 / FSR 下，越压读数↓）</label>
+  </div>
+  <svg id="plot2" width="920" height="380" viewBox="0 0 920 380"></svg>
+  <div class="note">
+    左右两图同一函数族的镜像：V<sub>A</sub>=E/(1+x)，V<sub>B</sub>=E·x/(1+x)。
+    在 R<sub>F</sub>=R<sub>f</sub> 处两者都经过<b>半电源 1.65V</b>（对称点），且此处斜率最大。
+    钟形灵敏度 = 这条 S 形曲线在哪个 R 段最陡。
+  </div>
+</div>
+
+<div class="eq">g(x) = dV/dln x = E·x/(1+x)²，峰值在 x=1（R<sub>F</sub>=R<sub>f</sub>），峰值 = E/4 ≈ 0.825 V/ln单位 ≈ <b>1.9 V/decade</b></div>
+<div class="sub">口径：E=3.3V（ESP32 3V3 轨）；R–F 幂律出自 Interlink FSR 数据手册口径；轻压/重压段区间为 V1 实测标定（09-15/09-19）与 09-21 备课标注，量级示意、非精确边界。</div>
+
+<script>
+const E = 3.3, LN10 = Math.log(10);
+const g = x => E * x / ((1+x)*(1+x));            // V per ln-unit
+const gDec = x => g(x) * LN10;                   // V per decade
+const VA = x => E / (1 + x);                     // FSR top
+const VB = x => E * x / (1 + x);                 // FSR bottom
+
+function svgEl(tag, attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+
+// ---------- Plot 1: sensitivity bells (absolute R axis, two Rf) ----------
+(function(){
+  const svg = document.getElementById('plot1');
+  const W=920,H=380, L=70,R=30,T=20,B=46;
+  const pw=W-L-R, ph=H-T-B;
+  const lg = r => Math.log10(r);
+  const rMin=30, rMax=1e6;                       // 30Ω .. 1MΩ
+  const X = r => L + (lg(r)-lg(rMin))/(lg(rMax)-lg(rMin))*pw;
+  const yMax=2.2, Y = v => T + (1 - v/yMax)*ph;
+
+  // grid + axis
+  for(let d=1; d<=1e6; d*=10){
+    svg.appendChild(svgEl('line',{x1:X(d),y1:T,x2:X(d),y2:T+ph,stroke:'#eee'}));
+    const lab = d>=1000 ? (d/1000)+'k' : d+'';
+    const t=svgEl('text',{x:X(d),y:H-24,'font-size':11,'text-anchor':'middle',fill:'#888'}); t.textContent=lab+'Ω'; svg.appendChild(t);
+  }
+  for(let v=0; v<=2; v+=0.5){
+    svg.appendChild(svgEl('line',{x1:L,y1:Y(v),x2:L+pw,y2:Y(v),stroke: v===0?'#999':'#eee'}));
+    const t=svgEl('text',{x:L-8,y:Y(v)+4,'font-size':11,'text-anchor':'end',fill:'#888'}); t.textContent=v.toFixed(1); svg.appendChild(t);
+  }
+  const yl=svgEl('text',{x:14,y:T+ph/2,'font-size':12,fill:'#555',transform:`rotate(-90 14 ${T+ph/2})`,'text-anchor':'middle'});
+  yl.textContent='灵敏度（V / decade，每十倍电阻）'; svg.appendChild(yl);
+  const xl=svgEl('text',{x:L+pw/2,y:H-6,'font-size':12,fill:'#555','text-anchor':'middle'});
+  xl.textContent='R(FSR) 对数轴'; svg.appendChild(xl);
+
+  // operating-region bands (order-of-magnitude示意)
+  function band(r1,r2,color){
+    svg.appendChild(svgEl('rect',{x:X(r1),y:T,width:X(r2)-X(r1),height:ph,fill:color,opacity:.12}));
+  }
+  band(3e3, 3e5, '#1a7f37');   // 指尖轻压 ~3k–300k
+  band(80,  1.2e3,'#c62828');  // 鞋内站立 ~100Ω–1k
+
+  // bells centered at Rf
+  function bell(Rf, color, dash){
+    let d='';
+    for(let i=0;i<=400;i++){
+      const r = rMin*Math.pow(rMax/rMin, i/400);
+      const v = gDec(r/Rf);
+      d += (i?'L':'M')+X(r).toFixed(1)+','+Y(v).toFixed(1);
+    }
+    svg.appendChild(svgEl('path',{d,fill:'none',stroke:color,'stroke-width':2.5}));
+    if(dash){} // (both solid; kept for symmetry)
+  }
+  bell(1e4, '#1a7f37');
+  bell(330, '#c62828');
+
+  // peak markers
+  function peak(Rf,color,label){
+    const px=X(Rf), py=Y(gDec(1));
+    svg.appendChild(svgEl('line',{x1:px,y1:py,x2:px,y2:T+ph,stroke:color,'stroke-dasharray':'4 3','stroke-width':1.2,opacity:.7}));
+    const t=svgEl('text',{x:px+6,y:py-8,'font-size':12,fill:color,'font-weight':'bold'});
+    t.textContent=label; svg.appendChild(t);
+  }
+  peak(1e4,'#1a7f37','峰 @ R_F=10k → V1');
+  peak(330,'#c62828','峰 @ R_F=330 → V2');
+})();
+
+// ---------- Plot 2: transfer curves ----------
+(function(){
+  const svg = document.getElementById('plot2');
+  const W=920,H=380, L=70,R=30,T=20,B=46;
+  const pw=W-L-R, ph=H-T-B;
+  const lg = r => Math.log10(r);
+  const rMin=30, rMax=1e6;
+  const X = r => L + (lg(r)-lg(rMin))/(lg(rMax)-lg(rMin))*pw;
+  const yMax=3.3, Y = v => T + (1 - v/yMax)*ph;
+
+  for(let d=1; d<=1e6; d*=10){
+    svg.appendChild(svgEl('line',{x1:X(d),y1:T,x2:X(d),y2:T+ph,stroke:'#eee'}));
+    const lab = d>=1000 ? (d/1000)+'k' : d+'';
+    const t=svgEl('text',{x:X(d),y:H-24,'font-size':11,'text-anchor':'middle',fill:'#888'}); t.textContent=lab+'Ω'; svg.appendChild(t);
+  }
+  for(let v=0; v<=3.3; v+=0.5){
+    svg.appendChild(svgEl('line',{x1:L,y1:Y(v),x2:L+pw,y2:Y(v),stroke: v===0?'#999':'#eee'}));
+    const t=svgEl('text',{x:L-8,y:Y(v)+4,'font-size':11,'text-anchor':'end',fill:'#888'}); t.textContent=v.toFixed(1); svg.appendChild(t);
+  }
+  const yl=svgEl('text',{x:14,y:T+ph/2,'font-size':12,fill:'#555',transform:`rotate(-90 14 ${T+ph/2})`,'text-anchor':'middle'});
+  yl.textContent='V_out（V）'; svg.appendChild(yl);
+  const xl=svgEl('text',{x:L+pw/2,y:H-6,'font-size':12,fill:'#555','text-anchor':'middle'});
+  xl.textContent='R(FSR) 对数轴（越往左 = 力越大，FSR 幂律）'; svg.appendChild(xl);
+
+  const RF1=1e4, RF2=330;
+  function curve(Rf, fV, color, dash){
+    let d='';
+    for(let i=0;i<=400;i++){
+      const r = rMin*Math.pow(rMax/rMin, i/400);
+      const v = fV(r/Rf);
+      d += (i?'L':'M')+X(r).toFixed(1)+','+Y(Math.min(v,yMax)).toFixed(1);
+    }
+    svg.appendChild(svgEl('path',{d,fill:'none',stroke:color,'stroke-width':2.2,'stroke-dasharray':dash||'none'}));
+  }
+  const pA=document.getElementById('cbA'), pB=document.getElementById('cbB');
+  function draw(){
+    svg.querySelectorAll('path').forEach(p=>p.remove());
+    svg.querySelectorAll('.mk').forEach(m=>m.remove());
+    if(pA.checked){
+      curve(RF1, VA, '#1a7f37','6 4');
+      curve(RF2, VA, '#7cb342');
+    }
+    if(pB.checked){
+      curve(RF1, VB, '#1565c0','6 4');
+      curve(RF2, VB, '#c62828');
+    }
+    // symmetric points: both cross 1.65V at R_F=R_f
+    [[RF1,'10k'],[RF2,'330Ω']].forEach(([Rf,lab])=>{
+      svg.appendChild(svgEl('line',{x1:X(Rf),y1:Y(1.65),x2:X(Rf),y2:T+ph,stroke:'#666','stroke-dasharray':'3 3','stroke-width':1,opacity:.6}));
+      const c=svgEl('circle',{cx:X(Rf),cy:Y(1.65),r:4,fill:'#333',class:'mk'}); svg.appendChild(c);
+      const t=svgEl('text',{x:X(Rf)+7,y:Y(1.65)-7,'font-size':11.5,fill:'#333',class:'mk'});
+      t.textContent='R_F='+lab+' → 1.65V（对称点）'; svg.appendChild(t);
+    });
+    // half-supply line
+    svg.appendChild(svgEl('line',{x1:L,y1:Y(1.65),x2:L+pw,y2:Y(1.65),stroke:'#999','stroke-dasharray':'2 4','stroke-width':1}));
+    const t=svgEl('text',{x:L+6,y:Y(1.65)-5,'font-size':11,fill:'#999',class:'mk'}); t.textContent='半电源 1.65V'; svg.appendChild(t);
+  }
+  pA.onchange=draw; pB.onchange=draw; draw();
+})();
+</script>
+</body>
+</html>
