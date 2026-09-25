@@ -21,7 +21,7 @@
 | `content/` | 内容素材台账（INDEX + 文本条目；**只放素材，成品不放**，纪律见 §10） |
 | `scripts/` | 运维脚本（daily-pm 提醒） |
 | `skills/` | AI 技能库（本仓沉淀的可复用操作技能，如电路图绘制；pi 侧安装副本在 `~/.pi/agent/skills/`，双机同步靠 git） |
-| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git；2026-09-11 起为符号链接，**2026-09-22 相对化指向 `../pebble_space/volume/20260829.exoskeleton`，跨机通用（决策二十七）**：mini 侧经 pebble_space volume 链接落到 tank1 正本 `pebble_volume/projects/20260829.exoskeleton/`，MBP 侧为 pebble-sync 检出的工作副本（无备份窗口，改动后尽快 push 回 tank1）；tank2 每日镜像 04:30（pebble-sync mirror-daily）+ SSD 周备份接管） |
+| `volume/` | 媒体成品与原始文件、文章备份（小红书/视频/录屏/截图/文章；不入 git；2026-09-11 起为符号链接，**相对化跨机通用（决策二十七；2026-09-26 收敛后指向 `../pebble_space/volume/projects/20260829.exoskeleton`）**：mini 侧经 pebble_space volume 链接落到 tank1 正本 `pebble_volume/projects/20260829.exoskeleton/`，MBP 侧为 pebble-sync 检出的工作副本（无备份窗口，改动后尽快 push 回 tank1）；tank2 每日镜像 04:30（pebble-sync mirror-daily）+ SSD 周备份接管） |
 | 代码工件 | 不在本仓库：网站/仿真等开工时各自独立建仓，链接登记进 PROGRESS.md 卫星索引 |
 
 ## 3. 铁律（违者按编造或越权处理）
