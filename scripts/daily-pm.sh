@@ -1,11 +1,13 @@
 #!/bin/bash
-# 外骨骼计划 · 每日项目经理提醒（v5.3：黄灯布防退役——pi-web 网关每轮 prompt 后自动布防「【待验收】marker 卡」，脚本不再 PUT followup 备忘；v5.1：last.md 追加制+周日清空，决策二十四；v5：先总结后建议，决策十八；v4：周日双会话）
+# 外骨骼计划 · 每日项目经理提醒（v5.4：脚本级 marker 布防回归——CLI 直跑不经网关 prompt 通道，需 POST queue/arm 补布【待验收】卡，决策三十二；v5.3 曾移除脚本级布防，实为两头皆空；v5.1：last.md 追加制+周日清空，决策二十四；v5：先总结后建议，决策十八；v4：周日双会话）
 # 主触发：launchd local.exoskeleton-daily-pm（每日 08:00）—— 唯一触发源（2026-09-07 第十九决策移除 pi-subagents 兜底 schedule）
 # 交付：每天一条「每日提醒 · 日期」命名会话（先总结昨天、再建议今天）；周日额外一条「周复盘 · 日期」（先总结本周、再起草下周）。
 #        未读会话即提醒；用户进入回复后该会话转常态会话（可落账）；Bark 推送作手机端入口。
-#        v5.2（2026-09-22，已退役）：曾向网关 PUT followup 写「待读」备忘——pi-web 2026-12-17 二轮定稿后，
-#        网关每轮 prompt 开跑自动布防「【待验收】marker 卡」（跑过=必须验收，黄灯口径=备忘非空或队列有 pending 项），
-#        脚本级布防冗余，v5.3 移除（对齐 pi-web 新实现）。
+#        v5.2（2026-09-22，已退役）：曾向网关 PUT followup 写「待读」备忘。
+#        v5.3（2026-10-19，已退役）：曾以为网关每轮 prompt 自动布防 marker 卡可覆盖本脚本——实除只覆盖
+#        经 pi-web 发出的 prompt；CLI 直跑的会话两头皆空，10-20/10-21 两日灰点事故（决策三十二）。
+#        v5.4（2026-10-21）：会话创建后 POST /api/sessions/:sid/queue/arm 补布【待验收】marker 卡
+#        （幂等、与 v5.2 的 followup 备忘不同语义）；失败仅记日志，不影响提醒本体。
 # 失败语义：每日提醒本体失败 → 不写 stamp、exit 1（当天可手动 bash scripts/daily-pm.sh 补发；launchd 对睡眠错过的时点唤醒时补跑）；
 #           仅周复盘失败 → 写 stamp（防每日提醒重复推），exit 1，详见日志。
 # 幂等：stamp=今日则跳过；DAILY_PM_FORCE=1 强制跑（标题加「测试」前缀，不写 stamp）
@@ -74,6 +76,28 @@ except Exception as e:
 PY
 }
 
+# ---- marker 布防（v5.4，决策三十二）：CLI 直跑不经网关 prompt 通道，需手动补布【待验收】卡 ----
+GATEWAY="${PIWEB_URL:-http://localhost:8787}"
+arm_marker() { # $1=会话名；失败仅记日志，不影响提醒本体
+  local rel="${PWD#/}" f sid i
+  rel="${rel//\//-}" # cwd 转义规则同 pi session-manager：--<去首斜杠、/→->--
+  local sessdir="$HOME/.pi/agent/sessions/--${rel}--"
+  sid=""
+  for f in $(ls -t "$sessdir"/*.jsonl 2>/dev/null | head -20); do
+    grep -qF "\"name\":\"$1\"" "$f" && { sid="${f##*_}"; sid="${sid%.jsonl}"; break; }
+  done
+  if [ -z "$sid" ]; then log_err "WARN: [$1] 未匹配到本会话 jsonl，marker 未布防"; return 0; fi
+  for i in 1 2 3 4; do
+    if curl -sf -X POST "$GATEWAY/api/sessions/$sid/queue/arm" >/dev/null 2>&1; then
+      echo "[$(date '+%F %T')] armed marker sid=$sid"
+      return 0
+    fi
+    sleep 3 # 网关 SCAN_TTL 5s：新会话文件刚落盘可能尚未扫到（404），重试
+  done
+  log_err "WARN: [$1] marker 布防失败 sid=$sid（网关不可达/未扫到）"
+  return 0
+}
+
 # ---- 幂等与并发 ----
 if [ "${DAILY_PM_FORCE:-0}" != "1" ] && [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$TODAY" ]; then
   echo "[$(date '+%F %T')] 今日已推送，跳过"
@@ -95,6 +119,7 @@ run_one() { # $1=会话名 $2=user开场白 $3=Bark标题前缀
   body="$(printf '%s' "$msg" | head -c 300)"$'\n''（回复请进会话）'
   if [ "${DAILY_PM_FORCE:-0}" = "1" ]; then title="[测试] $btitle · $TODAY"; else title="$btitle · $TODAY"; fi
   push_bark "$title" "$body" || { log_err "ERROR: [$sname] bark 推送失败（会话已创建）"; return 1; }
+  arm_marker "$sname"
   printf '%s\nsession: %s\nprompt: %s\n\n%s\n' "$(date '+%F %T')" "$sname" "$umsg" "$msg" >>"$LAST"
   echo "[$(date '+%F %T')] OK name=$sname (force=${DAILY_PM_FORCE:-0})"
 }
